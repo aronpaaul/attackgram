@@ -56,26 +56,27 @@ jobs:
             --configuration=release_arm64 \
             --buildNumber="$BUILD_NUMBER"
 
-          # собираем ipa
+          # собираем ipa (Swiftgram переименовывает таргет -> Swiftgram.ipa)
           OUTPUT_PATH="build/artifacts"
           rm -rf "$OUTPUT_PATH"
           mkdir -p "$OUTPUT_PATH"
-          for f in bazel-out/applebin_ios-ios_arm*-opt-ST-*/bin/Telegram/Telegram.ipa; do
-            cp "$f" $OUTPUT_PATH/
-          done
+          IPA_SRC="bazel-bin/Telegram/Swiftgram.ipa"
+          if [ ! -f "$IPA_SRC" ]; then
+            IPA_SRC="$(find -L bazel-out -path '*/bin/Telegram/*.ipa' -type f 2>/dev/null | head -1)"
+          fi
+          echo "IPA_SRC=$IPA_SRC"
+          cp "$IPA_SRC" "$OUTPUT_PATH/Attackgram.ipa"
 
           # собираем dsym
           mkdir -p build/DSYMs
-          for f in bazel-out/applebin_ios-ios_arm*-opt-ST-*/bin/Telegram/*.dSYM; do
-            cp -R "$f" build/DSYMs/
-          done
-          zip -r "./$OUTPUT_PATH/Telegram.DSYMs.zip" build/DSYMs 1>/dev/null
+          cp -RL bazel-bin/Telegram/*.dSYM build/DSYMs/ 2>/dev/null || true
+          zip -r "./$OUTPUT_PATH/Attackgram.DSYMs.zip" build/DSYMs 1>/dev/null || true
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
           name: Attackgram-unsigned-${{ env.APP_VERSION }}-${{ env.BUILD_NUMBER }}
-          path: /Users/Shared/telegram-ios/build/artifacts/Telegram.ipa
+          path: /Users/Shared/telegram-ios/build/artifacts/Attackgram.ipa
           if-no-files-found: error
           retention-days: 30
 
@@ -83,6 +84,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Attackgram-DSYMs-${{ env.APP_VERSION }}-${{ env.BUILD_NUMBER }}
-          path: /Users/Shared/telegram-ios/build/artifacts/Telegram.DSYMs.zip
+          path: /Users/Shared/telegram-ios/build/artifacts/Attackgram.DSYMs.zip
           if-no-files-found: warn
           retention-days: 30
