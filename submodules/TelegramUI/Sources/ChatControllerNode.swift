@@ -3631,7 +3631,12 @@ class ChatControllerNode: ASDisplayNode, ASScrollViewDelegate {
         }
     }
         
-    private let emptyInputView = EmptyInputView()
+    private final class SGEmptyInputView: UIView, UIInputViewAudioFeedback {
+        var enableInputClicksWhenVisible: Bool {
+            return true
+        }
+    }
+    private let emptyInputView = SGEmptyInputView()
     private func chatPresentationInterfaceStateInputView(_ state: ChatPresentationInterfaceState) -> UIView? {
         switch state.inputMode {
         case .text:
