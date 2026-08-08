@@ -668,6 +668,7 @@ open class ChatMessageItemView: ListViewItemNode, ChatMessageItemNodeProtocol {
     
     private var wasFilteredKeywordTested: Bool = false
     private var matchedFilterKeyword: String? = nil
+    private var sgIsDeletedStyled: Bool = false
     
     public required init(rotated: Bool) {
         super.init(layerBacked: false, rotated: rotated)
@@ -691,6 +692,12 @@ open class ChatMessageItemView: ListViewItemNode, ChatMessageItemNodeProtocol {
         self.frame = CGRect()
         self.wasFilteredKeywordTested = false
         self.matchedFilterKeyword = nil
+        if self.sgIsDeletedStyled {
+            self.sgIsDeletedStyled = false
+            self.alpha = 1.0
+            self.backgroundColor = nil
+            self.layer.removeAnimation(forKey: "sgDeletedBlink")
+        }
     }
     
     open func setupItem(_ item: ChatMessageItem, synchronousLoad: Bool) {
@@ -706,6 +713,21 @@ open class ChatMessageItemView: ListViewItemNode, ChatMessageItemNodeProtocol {
             }
         }
         self.wasFilteredKeywordTested = true
+
+        // MARK: Attackgram — highlight messages deleted by others (dimmed, slightly red, blinking)
+        if !self.sgIsDeletedStyled && SGSimpleSettings.shared.showDeletedMessages && item.message.attributes.contains(where: { $0 is SGDeletedMessageAttribute }) {
+            self.sgIsDeletedStyled = true
+            self.alpha = 0.6
+            self.backgroundColor = UIColor(red: 1.0, green: 0.23, blue: 0.19, alpha: 0.12)
+            let blink = CABasicAnimation(keyPath: "opacity")
+            blink.fromValue = 0.6
+            blink.toValue = 0.25
+            blink.duration = 1.1
+            blink.autoreverses = true
+            blink.repeatCount = .infinity
+            blink.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            self.layer.add(blink, forKey: "sgDeletedBlink")
+        }
     }
     
     open func updateAccessibilityData(_ accessibilityData: ChatMessageAccessibilityData) {

@@ -430,7 +430,8 @@ private final class StoryContainerScreenComponent: Component {
         private var pendingNavigationToItemId: EngineStoryId?
         
         private let storiesWarning = ComponentView<Empty>()
-        private var requestedDisplayStoriesWarning: Bool = SGSimpleSettings.shared.warnOnStoriesOpen // MARK: Swiftgram
+        private var requestedDisplayStoriesWarning: Bool = SGSimpleSettings.shared.warnOnStoriesOpen || SGSimpleSettings.shared.storyGhostMode // MARK: Swiftgram / Attackgram
+        private var sgGhostViewActive: Bool = false // MARK: Attackgram — when true, story views are not reported to the server
         private var displayStoriesWarningDisposable: Disposable?
         private var isDisplayingStoriesWarning: Bool = false
         
@@ -1335,10 +1336,13 @@ private final class StoryContainerScreenComponent: Component {
                     }
                 })
                 
-                // MARK: Swiftgram
-                self.requestedDisplayStoriesWarning = SGSimpleSettings.shared.warnOnStoriesOpen
+                // MARK: Swiftgram / Attackgram
+                self.requestedDisplayStoriesWarning = SGSimpleSettings.shared.warnOnStoriesOpen || SGSimpleSettings.shared.storyGhostMode
                 if self.requestedDisplayStoriesWarning {
                     self.isDisplayingStoriesWarning = true
+                    if SGSimpleSettings.shared.storyGhostMode {
+                        self.sgGhostViewActive = true
+                    }
                     if update {
                         self.state?.updated(transition: .immediate)
                     }
@@ -1726,6 +1730,9 @@ private final class StoryContainerScreenComponent: Component {
                                     guard let self, let component = self.component else {
                                         return
                                     }
+                                    if self.sgGhostViewActive { // MARK: Attackgram — do not report the view to the server
+                                        return
+                                    }
                                     component.content.markAsSeen(id: id)
                                 },
                                 reorder: { [weak self] in
@@ -2013,6 +2020,7 @@ private final class StoryContainerScreenComponent: Component {
                             peer: component.content.stateValue?.slice?.peer,
                             isInStealthMode: stealthModeTimeout != nil || SGSimpleSettings.shared.isStealthModeEnabled,
                             action: { [weak self] in
+                                self?.sgGhostViewActive = false // MARK: Attackgram — view normally, report as seen
                                 self?.isDisplayingStoriesWarning = false
                                 self?.state?.updated(transition: .immediate)
                                 if let view = self?.storiesWarning.view as? SGStoryWarningComponent.View {
@@ -2021,6 +2029,16 @@ private final class StoryContainerScreenComponent: Component {
                                     })
                                 }
                             },
+                            ghostAction: SGSimpleSettings.shared.storyGhostMode ? { [weak self] in
+                                self?.sgGhostViewActive = true // MARK: Attackgram — ghost view, do not report as seen
+                                self?.isDisplayingStoriesWarning = false
+                                self?.state?.updated(transition: .immediate)
+                                if let view = self?.storiesWarning.view as? SGStoryWarningComponent.View {
+                                    view.animateOut(completion: {
+                                        view.removeFromSuperview()
+                                    })
+                                }
+                            } : nil,
                             close: { [weak self] in
                                 self?.environment?.controller()?.dismiss()
                                 if let view = self?.storiesWarning.view as? SGStoryWarningComponent.View {

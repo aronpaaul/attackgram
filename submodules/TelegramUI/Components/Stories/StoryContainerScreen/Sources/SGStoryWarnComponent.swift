@@ -19,8 +19,9 @@ final class SGStoryWarningComponent: Component {
     let peer: EnginePeer?
     let isInStealthMode: Bool
     let action: () -> Void
+    let ghostAction: (() -> Void)?
     let close: () -> Void
-    
+
     init(
         context: AccountContext,
         theme: PresentationTheme,
@@ -28,6 +29,7 @@ final class SGStoryWarningComponent: Component {
         peer: EnginePeer? = nil,
         isInStealthMode: Bool,
         action: @escaping () -> Void,
+        ghostAction: (() -> Void)? = nil,
         close: @escaping () -> Void
     ) {
         self.context = context
@@ -36,6 +38,7 @@ final class SGStoryWarningComponent: Component {
         self.strings = strings
         self.isInStealthMode = isInStealthMode
         self.action = action
+        self.ghostAction = ghostAction
         self.close = close
     }
     
@@ -55,6 +58,7 @@ final class SGStoryWarningComponent: Component {
         private let titleLabel = ComponentView<Empty>()
         private let descriptionLabel = ComponentView<Empty>()
         private let actionButton = ComponentView<Empty>()
+        private let ghostButton = ComponentView<Empty>()
         
         let closeButton: HighlightableButton
         
@@ -86,7 +90,13 @@ final class SGStoryWarningComponent: Component {
                 component.action()
             }
         }
-        
+
+        @objc private func handleGhost() {
+            if let component = self.component {
+                component.ghostAction?()
+            }
+        }
+
         @objc private func handleClose() {
             if let component = self.component {
                 component.close()
@@ -165,6 +175,7 @@ final class SGStoryWarningComponent: Component {
                 containerSize: CGSize(width: availableSize.width - sideInset * 2.0, height: availableSize.height)
             )
             
+            let primaryButtonText = component.ghostAction != nil ? i18n("Stories.Warning.NormalView", component.strings.baseLanguageCode) : component.strings.Chat_StoryMentionAction
             let buttonSize = self.actionButton.update(
                 transition: .immediate,
                 component: AnyComponent(
@@ -175,9 +186,9 @@ final class SGStoryWarningComponent: Component {
                             pressedColor: component.theme.list.itemCheckColors.fillColor.withMultipliedAlpha(0.9)
                         ),
                         content: AnyComponentWithIdentity(
-                            id: component.strings.Chat_StoryMentionAction,
+                            id: primaryButtonText,
                             component: AnyComponent(ButtonTextContentComponent(
-                                text: component.strings.Chat_StoryMentionAction,
+                                text: primaryButtonText,
                                 badge: 0,
                                 textColor: component.theme.list.itemCheckColors.foregroundColor,
                                 badgeBackground: component.theme.list.itemCheckColors.foregroundColor,
@@ -195,9 +206,43 @@ final class SGStoryWarningComponent: Component {
                 environment: {},
                 containerSize: CGSize(width: availableSize.width - sideInset * 2.0, height: 50.0)
             )
-            
-            
-            let totalHeight = titleSize.height + 7.0 + textSize.height + 50.0 + buttonSize.height
+
+            var ghostButtonSize = CGSize.zero
+            if component.ghostAction != nil {
+                let ghostText = i18n("Stories.Warning.GhostView", component.strings.baseLanguageCode)
+                ghostButtonSize = self.ghostButton.update(
+                    transition: .immediate,
+                    component: AnyComponent(
+                        ButtonComponent(
+                            background: ButtonComponent.Background(
+                                color: UIColor(rgb: 0xffffff, alpha: 0.15),
+                                foreground: UIColor.white,
+                                pressedColor: UIColor(rgb: 0xffffff, alpha: 0.1)
+                            ),
+                            content: AnyComponentWithIdentity(
+                                id: ghostText,
+                                component: AnyComponent(ButtonTextContentComponent(
+                                    text: ghostText,
+                                    badge: 0,
+                                    textColor: UIColor.white,
+                                    badgeBackground: UIColor.white,
+                                    badgeForeground: UIColor.clear
+                                ))
+                            ),
+                            isEnabled: true,
+                            displaysProgress: false,
+                            action: { [weak self] in
+                                self?.handleGhost()
+                            }
+                        )
+                    ),
+                    environment: {},
+                    containerSize: CGSize(width: availableSize.width - sideInset * 2.0, height: 50.0)
+                )
+            }
+
+            let ghostExtraHeight: CGFloat = component.ghostAction != nil ? (10.0 + ghostButtonSize.height) : 0.0
+            let totalHeight = titleSize.height + 7.0 + textSize.height + 50.0 + buttonSize.height + ghostExtraHeight
             let originY = (availableSize.height - totalHeight) / 2.0
             
             let titleFrame = CGRect(
@@ -232,7 +277,20 @@ final class SGStoryWarningComponent: Component {
                 }
                 view.frame = buttonFrame
             }
-            
+
+            if component.ghostAction != nil {
+                let ghostFrame = CGRect(
+                    origin: CGPoint(x: (availableSize.width - ghostButtonSize.width) / 2.0, y: buttonFrame.maxY + 10.0),
+                    size: ghostButtonSize
+                )
+                if let view = self.ghostButton.view {
+                    if view.superview == nil {
+                        self.containerView.addSubview(view)
+                    }
+                    view.frame = ghostFrame
+                }
+            }
+
             let bounds = CGRect(origin: .zero, size: availableSize)
             self.effectView.frame = bounds
             self.containerView.frame = bounds

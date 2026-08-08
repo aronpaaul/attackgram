@@ -74,7 +74,10 @@ public class SGSimpleSettings {
             { let _ = self.hideRecordingButton },
             { let _ = self.inputToolbar },
             { let _ = self.dismissedSGSuggestions },
-            { let _ = self.customAppBadge }
+            { let _ = self.customAppBadge },
+            { let _ = self.ghostReadMessages },
+            { let _ = self.storyGhostMode },
+            { let _ = self.showDeletedMessages }
         ]
 
         tasks.forEach { task in
@@ -176,6 +179,9 @@ public class SGSimpleSettings {
         case warnOnStoriesOpen
         case showProfileId
         case sendWithReturnKey
+        case ghostReadMessages
+        case storyGhostMode
+        case showDeletedMessages
     }
     
     public enum DownloadSpeedBoostValues: String, CaseIterable {
@@ -328,9 +334,12 @@ public class SGSimpleSettings {
         Keys.hideStories.rawValue: false,
         Keys.warnOnStoriesOpen.rawValue: false,
         Keys.showProfileId.rawValue: true,
-        Keys.sendWithReturnKey.rawValue: false
+        Keys.sendWithReturnKey.rawValue: false,
+        Keys.ghostReadMessages.rawValue: false,
+        Keys.storyGhostMode.rawValue: false,
+        Keys.showDeletedMessages.rawValue: false
     ]
-    
+
     public static let groupDefaultValues: [String: Any] = [
         Keys.legacyNotificationsFix.rawValue: false,
         Keys.pinnedMessageNotifications.rawValue: PinnedMessageNotificationsSettings.default.rawValue,
@@ -556,7 +565,16 @@ public class SGSimpleSettings {
 
     @UserDefault(key: Keys.sendWithReturnKey.rawValue)
     public var sendWithReturnKey: Bool
-    
+
+    @UserDefault(key: Keys.ghostReadMessages.rawValue)
+    public var ghostReadMessages: Bool
+
+    @UserDefault(key: Keys.storyGhostMode.rawValue)
+    public var storyGhostMode: Bool
+
+    @UserDefault(key: Keys.showDeletedMessages.rawValue)
+    public var showDeletedMessages: Bool
+
     @UserDefault(key: Keys.pinnedMessageNotifications.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
     public var pinnedMessageNotifications: String
     

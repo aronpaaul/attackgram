@@ -2,6 +2,7 @@ import Foundation
 import Postbox
 import TelegramApi
 import SwiftSignalKit
+import SGSimpleSettings
 
 
 private enum PeerReadStateMarker: Equatable {
@@ -227,6 +228,10 @@ private func validatePeerReadState(network: Network, postbox: Postbox, stateMana
 }
 
 private func pushPeerReadState(network: Network, postbox: Postbox, stateManager: AccountStateManager, peerId: PeerId, readState: PeerReadState) -> Signal<PeerReadState, PeerReadStateValidationError> {
+    // MARK: Attackgram ghost read — do not notify the server that messages were read
+    if SGSimpleSettings.shared.ghostReadMessages && peerId.namespace != Namespaces.Peer.SecretChat {
+        return .single(readState)
+    }
     if peerId.namespace == Namespaces.Peer.SecretChat {
         return inputSecretChat(postbox: postbox, peerId: peerId)
         |> mapToSignal { inputPeer -> Signal<PeerReadState, PeerReadStateValidationError> in

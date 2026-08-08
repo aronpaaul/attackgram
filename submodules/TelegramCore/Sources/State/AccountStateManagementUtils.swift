@@ -4,6 +4,7 @@ import SwiftSignalKit
 import TelegramApi
 import MtProtoKit
 import EncryptionProvider
+import SGSimpleSettings
 
 private func reactionGeneratedEvent(_ previousReactions: ReactionsMessageAttribute?, _ updatedReactions: ReactionsMessageAttribute?, message: Message, transaction: Transaction) -> (reactionAuthor: Peer, reaction: MessageReaction.Reaction, message: Message, timestamp: Int32)? {
     if let updatedReactions = updatedReactions, !message.flags.contains(.Incoming), message.id.peerId.namespace == Namespaces.Peer.CloudUser {
@@ -4449,10 +4450,44 @@ func replayFinalState(
                 }
                 deletedMessageIds.append(contentsOf: ids.map { .global($0) })
             case let .DeleteMessages(ids):
-                _internal_deleteMessages(transaction: transaction, mediaBox: mediaBox, ids: ids, manualAddMessageThreadStatsDifference: { id, add, remove in
-                    addMessageThreadStatsDifference(threadKey: id, remove: remove, addedMessagePeer: nil, addedMessageId: nil, isOutgoing: false)
-                })
-                deletedMessageIds.append(contentsOf: ids.map { .messageId($0) })
+                // MARK: Attackgram — keep messages deleted by others, mark them instead of deleting
+                if SGSimpleSettings.shared.showDeletedMessages {
+                    var keptIds = Set<MessageId>()
+                    for id in ids {
+                        guard let message = transaction.getMessage(id) else {
+                            continue
+                        }
+                        if message.flags.intersection(.IsIncomingMask).isEmpty {
+                            continue
+                        }
+                        if message.attributes.contains(where: { $0 is SGDeletedMessageAttribute }) {
+                            keptIds.insert(id)
+                            continue
+                        }
+                        transaction.updateMessage(id, update: { currentMessage in
+                            var attributes = currentMessage.attributes
+                            attributes.append(SGDeletedMessageAttribute(date: currentMessage.timestamp))
+                            var storeForwardInfo: StoreMessageForwardInfo?
+                            if let forwardInfo = currentMessage.forwardInfo {
+                                storeForwardInfo = StoreMessageForwardInfo(authorId: forwardInfo.author?.id, sourceId: forwardInfo.source?.id, sourceMessageId: forwardInfo.sourceMessageId, date: forwardInfo.date, authorSignature: forwardInfo.authorSignature, psaType: forwardInfo.psaType, flags: forwardInfo.flags)
+                            }
+                            return .update(StoreMessage(id: currentMessage.id, customStableId: nil, globallyUniqueId: currentMessage.globallyUniqueId, groupingKey: currentMessage.groupingKey, threadId: currentMessage.threadId, timestamp: currentMessage.timestamp, flags: StoreMessageFlags(currentMessage.flags), tags: currentMessage.tags, globalTags: currentMessage.globalTags, localTags: currentMessage.localTags, forwardInfo: storeForwardInfo, authorId: currentMessage.author?.id, text: currentMessage.text, attributes: attributes, media: currentMessage.media))
+                        })
+                        keptIds.insert(id)
+                    }
+                    let deleteIds = ids.filter { !keptIds.contains($0) }
+                    if !deleteIds.isEmpty {
+                        _internal_deleteMessages(transaction: transaction, mediaBox: mediaBox, ids: deleteIds, manualAddMessageThreadStatsDifference: { id, add, remove in
+                            addMessageThreadStatsDifference(threadKey: id, remove: remove, addedMessagePeer: nil, addedMessageId: nil, isOutgoing: false)
+                        })
+                    }
+                    deletedMessageIds.append(contentsOf: deleteIds.map { .messageId($0) })
+                } else {
+                    _internal_deleteMessages(transaction: transaction, mediaBox: mediaBox, ids: ids, manualAddMessageThreadStatsDifference: { id, add, remove in
+                        addMessageThreadStatsDifference(threadKey: id, remove: remove, addedMessagePeer: nil, addedMessageId: nil, isOutgoing: false)
+                    })
+                    deletedMessageIds.append(contentsOf: ids.map { .messageId($0) })
+                }
             case let .UpdateMinAvailableMessage(id):
                 if let message = transaction.getMessage(id) {
                     updatePeerChatInclusionWithMinTimestamp(transaction: transaction, id: id.peerId, minTimestamp: message.timestamp, forceRootGroupIfNotExists: false)

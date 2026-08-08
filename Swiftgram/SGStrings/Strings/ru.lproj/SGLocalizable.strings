@@ -272,3 +272,13 @@
 "Settings.NY.Style.snow" = "Снег";
 "Settings.NY.Style.lightning" = "Молнии";
 "Settings.NY.Notice" = "Доступны только на ограниченное время!";
+
+"Settings.Ghost.Header" = "ПРИЗРАЧНЫЙ РЕЖИМ";
+"Settings.Ghost.ReadMessages" = "Не отправлять отметку о прочтении";
+"Settings.Ghost.ReadMessages.Notice" = "Открытые чаты не помечаются прочитанными для собеседника — он не видит галочки. После полного перезахода в приложение чат может снова стать непрочитанным.";
+"Settings.Ghost.StoryAsk" = "Спрашивать при открытии историй";
+"Settings.Ghost.StoryAsk.Notice" = "При открытии истории можно посмотреть её так, чтобы автор не узнал о просмотре.";
+"Settings.Ghost.ShowDeleted" = "Показывать удалённые сообщения";
+"Settings.Ghost.ShowDeleted.Notice" = "Сообщения, удалённые собеседником, остаются видимыми — затемнённые, слегка красные и плавно мигают.";
+"Stories.Warning.GhostView" = "Посмотреть незаметно";
+"Stories.Warning.NormalView" = "Посмотреть обычно";

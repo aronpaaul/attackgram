@@ -277,3 +277,13 @@
 "Settings.NY.Style.snow" = "Snow";
 "Settings.NY.Style.lightning" = "Lightning";
 "Settings.NY.Notice" = "Available for a limited time only!";
+
+"Settings.Ghost.Header" = "GHOST MODE";
+"Settings.Ghost.ReadMessages" = "Don't Send Read Receipts";
+"Settings.Ghost.ReadMessages.Notice" = "Chats you open won't be reported as read to the other side, so they don't see the read checkmarks. A chat may show as unread again after a full app restart.";
+"Settings.Ghost.StoryAsk" = "Ask When Opening Stories";
+"Settings.Ghost.StoryAsk.Notice" = "When you open a story you can choose to view it without the author being told that you watched it.";
+"Settings.Ghost.ShowDeleted" = "Show Deleted Messages";
+"Settings.Ghost.ShowDeleted.Notice" = "Messages deleted by others stay visible — dimmed, slightly red and gently blinking.";
+"Stories.Warning.GhostView" = "View without a trace";
+"Stories.Warning.NormalView" = "View normally";

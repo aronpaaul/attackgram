@@ -115,6 +115,7 @@ private var declaredEncodables: Void = {
     declareEncodable(CloudDocumentMediaResource.self, f: { CloudDocumentMediaResource(decoder: $0) })
     declareEncodable(TelegramMediaWebpage.self, f: { TelegramMediaWebpage(decoder: $0) })
     declareEncodable(ViewCountMessageAttribute.self, f: { ViewCountMessageAttribute(decoder: $0) })
+    declareEncodable(SGDeletedMessageAttribute.self, f: { SGDeletedMessageAttribute(decoder: $0) })
     declareEncodable(ForwardCountMessageAttribute.self, f: { ForwardCountMessageAttribute(decoder: $0) })
     declareEncodable(BoostCountMessageAttribute.self, f: { BoostCountMessageAttribute(decoder: $0) })
     declareEncodable(ParticipantRankMessageAttribute.self, f: { ParticipantRankMessageAttribute(decoder: $0) })

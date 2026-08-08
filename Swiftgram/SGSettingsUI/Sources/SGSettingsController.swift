@@ -29,6 +29,7 @@ private enum SGControllerSection: Int32, SGItemListSection {
     case search
     case trending
     case content
+    case ghost
     case tabs
     case folders
     case chatList
@@ -46,6 +47,9 @@ private enum SGControllerSection: Int32, SGItemListSection {
 }
 
 private enum SGBoolSetting: String {
+    case ghostReadMessages
+    case storyGhostMode
+    case showDeletedMessages
     case hidePhoneInSettings
     case showTabNames
     case showContactsTab
@@ -167,7 +171,15 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     } else {
         id.increment(1)
     }
-    
+
+    entries.append(.header(id: id.count, section: .ghost, text: i18n("Settings.Ghost.Header", lang), badge: nil))
+    entries.append(.toggle(id: id.count, section: .ghost, settingName: .ghostReadMessages, value: SGSimpleSettings.shared.ghostReadMessages, text: i18n("Settings.Ghost.ReadMessages", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .ghost, text: i18n("Settings.Ghost.ReadMessages.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .ghost, settingName: .storyGhostMode, value: SGSimpleSettings.shared.storyGhostMode, text: i18n("Settings.Ghost.StoryAsk", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .ghost, text: i18n("Settings.Ghost.StoryAsk.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .ghost, settingName: .showDeletedMessages, value: SGSimpleSettings.shared.showDeletedMessages, text: i18n("Settings.Ghost.ShowDeleted", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .ghost, text: i18n("Settings.Ghost.ShowDeleted.Notice", lang)))
+
     entries.append(.header(id: id.count, section: .tabs, text: i18n("Settings.Tabs.Header", lang), badge: nil))
     entries.append(.toggle(id: id.count, section: .tabs, settingName: .hideTabBar, value: SGSimpleSettings.shared.hideTabBar, text: i18n("Settings.Tabs.HideTabBar", lang), enabled: true))
     entries.append(.toggle(id: id.count, section: .tabs, settingName: .showContactsTab, value: callListSettings.showContactsTab, text: i18n("Settings.Tabs.ShowContacts", lang), enabled: !SGSimpleSettings.shared.hideTabBar))
@@ -364,6 +376,12 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
           }
         },*/ setBoolValue: { setting, value in
         switch setting {
+        case .ghostReadMessages:
+            SGSimpleSettings.shared.ghostReadMessages = value
+        case .storyGhostMode:
+            SGSimpleSettings.shared.storyGhostMode = value
+        case .showDeletedMessages:
+            SGSimpleSettings.shared.showDeletedMessages = value
         case .hidePhoneInSettings:
             SGSimpleSettings.shared.hidePhoneInSettings = value
             askForRestart?()
