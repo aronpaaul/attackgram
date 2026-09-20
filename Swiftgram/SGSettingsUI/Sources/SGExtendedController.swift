@@ -17,8 +17,24 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
             SGSimpleSettings.shared.unlimitedPinnedChats = value
             statePromise.set(true)
         },
+        toggleInvisibleMode: { value in
+            SGSimpleSettings.shared.invisibleMode = value
+            statePromise.set(true)
+        },
+        toggleHideOnline: { value in
+            SGSimpleSettings.shared.hideOnlineStatus = value
+            statePromise.set(true)
+        },
+        toggleHideTyping: { value in
+            SGSimpleSettings.shared.hideTypingStatus = value
+            statePromise.set(true)
+        },
         toggleDontSendRead: { value in
             SGSimpleSettings.shared.dontSendReadReceipts = value
+            statePromise.set(true)
+        },
+        toggleVoiceVideoReceipts: { value in
+            SGSimpleSettings.shared.dontSendVoiceVideoReceipts = value
             statePromise.set(true)
         },
         toggleSaveDeleted: { value in
@@ -39,7 +55,11 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
     |> map { presentationData, _ -> (ItemListControllerState, (ItemListNodeState, Any)) in
         var entries: [SGExtendedEntry] = []
         entries.append(.unlimitedPins(SGSimpleSettings.shared.unlimitedPinnedChats))
+        entries.append(.invisibleMode(SGSimpleSettings.shared.invisibleMode))
+        entries.append(.hideOnline(SGSimpleSettings.shared.hideOnlineStatus))
+        entries.append(.hideTyping(SGSimpleSettings.shared.hideTypingStatus))
         entries.append(.dontSendRead(SGSimpleSettings.shared.dontSendReadReceipts))
+        entries.append(.voiceVideoReceipts(SGSimpleSettings.shared.dontSendVoiceVideoReceipts))
         entries.append(.saveDeleted(SGSimpleSettings.shared.saveDeletedMessages))
         if SGSimpleSettings.shared.saveDeletedMessages {
             entries.append(.saveDeletedBots(SGSimpleSettings.shared.saveDeletedFromBots))

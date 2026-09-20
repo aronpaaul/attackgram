@@ -3,6 +3,7 @@ import TelegramApi
 import Postbox
 import SwiftSignalKit
 import MtProtoKit
+import SGSimpleSettings
 
 private typealias SignalKitTimer = SwiftSignalKit.Timer
 
@@ -43,6 +44,11 @@ private final class AccountPresenceManagerImpl {
     }
     
     private func updatePresence(_ isOnline: Bool) {
+        if isOnline && (SGSimpleSettings.shared.hideOnlineStatus || SGSimpleSettings.shared.invisibleMode) {
+            self.onlineTimer?.invalidate()
+            self.onlineTimer = nil
+            return
+        }
         let request: Signal<Api.Bool, MTRpcError>
         if isOnline {
             let timer = SignalKitTimer(timeout: 30.0, repeat: false, completion: { [weak self] in

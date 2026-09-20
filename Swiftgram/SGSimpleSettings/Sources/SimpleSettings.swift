@@ -116,6 +116,10 @@ public class SGSimpleSettings {
         case saveDeletedMessages
         case saveDeletedFromBots
         case saveDeletedFromSelf
+        case hideOnlineStatus
+        case hideTypingStatus
+        case dontSendVoiceVideoReceipts
+        case invisibleMode
         case showRepostToStory
         case showRepostToStoryV2
         case contextShowSelectFromUser
@@ -257,7 +261,7 @@ public class SGSimpleSettings {
     }
     
     public static let defaultValues: [String: Any] = [
-        Keys.hidePhoneInSettings.rawValue: true,
+        Keys.hidePhoneInSettings.rawValue: false,
         Keys.showTabNames.rawValue: true,
         Keys.startTelescopeWithRearCam.rawValue: false,
         Keys.accountColorsSaturation.rawValue: 100,
@@ -280,6 +284,10 @@ public class SGSimpleSettings {
         Keys.saveDeletedMessages.rawValue: false,
         Keys.saveDeletedFromBots.rawValue: false,
         Keys.saveDeletedFromSelf.rawValue: false,
+        Keys.hideOnlineStatus.rawValue: false,
+        Keys.hideTypingStatus.rawValue: false,
+        Keys.dontSendVoiceVideoReceipts.rawValue: false,
+        Keys.invisibleMode.rawValue: false,
         Keys.showRepostToStory.rawValue: true,
         Keys.contextShowSelectFromUser.rawValue: true,
         Keys.contextShowSaveToCloud.rawValue: true,
@@ -427,6 +435,18 @@ public class SGSimpleSettings {
 
     @UserDefault(key: Keys.saveDeletedFromSelf.rawValue)
     public var saveDeletedFromSelf: Bool
+
+    @UserDefault(key: Keys.hideOnlineStatus.rawValue)
+    public var hideOnlineStatus: Bool
+
+    @UserDefault(key: Keys.hideTypingStatus.rawValue)
+    public var hideTypingStatus: Bool
+
+    @UserDefault(key: Keys.dontSendVoiceVideoReceipts.rawValue)
+    public var dontSendVoiceVideoReceipts: Bool
+
+    @UserDefault(key: Keys.invisibleMode.rawValue)
+    public var invisibleMode: Bool
 
     // @available(*, deprecated, message: "Use showRepostToStoryV2 instead")
     @UserDefault(key: Keys.showRepostToStory.rawValue)

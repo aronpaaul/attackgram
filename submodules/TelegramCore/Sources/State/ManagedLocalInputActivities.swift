@@ -3,6 +3,7 @@ import Postbox
 import SwiftSignalKit
 import TelegramApi
 import MtProtoKit
+import SGSimpleSettings
 
 
 public struct PeerActivitySpace: Hashable {
@@ -146,6 +147,20 @@ private func requestActivity(postbox: Postbox, network: Network, accountPeerId: 
         if let peer = transaction.getPeer(peerId) {
             if peerId == accountPeerId {
                 return .complete()
+            }
+            if let activity = activity {
+                var isGroupCallSpeaking = false
+                if case .speakingInGroupCall = activity {
+                    isGroupCallSpeaking = true
+                }
+                if !isGroupCallSpeaking {
+                    if SGSimpleSettings.shared.invisibleMode {
+                        return .complete()
+                    }
+                    if case .typingText = activity, SGSimpleSettings.shared.hideTypingStatus {
+                        return .complete()
+                    }
+                }
             }
             if let channel = peer as? TelegramChannel, case .broadcast = channel.info {
                 if let activity = activity {

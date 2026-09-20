@@ -253,7 +253,7 @@ private func pushPeerReadState(network: Network, postbox: Postbox, stateManager:
                 switch readState {
                 case let .idBased(maxIncomingReadId, _, _, _, markedUnread):
                     var pushSignal: Signal<Void, NoError>
-                    if SGSimpleSettings.shared.dontSendReadReceipts {
+                    if SGSimpleSettings.shared.dontSendReadReceipts || SGSimpleSettings.shared.invisibleMode {
                         pushSignal = .complete()
                     } else {
                         pushSignal = network.request(Api.functions.channels.readHistory(channel: Api.InputChannel.inputChannel(.init(channelId: channelId, accessHash: accessHash)), maxId: maxIncomingReadId))
@@ -288,7 +288,7 @@ private func pushPeerReadState(network: Network, postbox: Postbox, stateManager:
                 switch readState {
                 case let .idBased(maxIncomingReadId, _, _, _, markedUnread):
                     var pushSignal: Signal<Void, NoError>
-                    if SGSimpleSettings.shared.dontSendReadReceipts {
+                    if SGSimpleSettings.shared.dontSendReadReceipts || SGSimpleSettings.shared.invisibleMode {
                         pushSignal = .complete()
                     } else {
                         pushSignal = network.request(Api.functions.messages.readHistory(peer: inputPeer, maxId: maxIncomingReadId))
