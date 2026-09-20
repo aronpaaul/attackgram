@@ -691,6 +691,7 @@ open class ChatMessageItemView: ListViewItemNode, ChatMessageItemNodeProtocol {
         self.frame = CGRect()
         self.wasFilteredKeywordTested = false
         self.matchedFilterKeyword = nil
+        self.alpha = 1.0
     }
     
     open func setupItem(_ item: ChatMessageItem, synchronousLoad: Bool) {
@@ -706,8 +707,12 @@ open class ChatMessageItemView: ListViewItemNode, ChatMessageItemNodeProtocol {
             }
         }
         self.wasFilteredKeywordTested = true
+
+        if item.message.attributes.contains(where: { $0 is SGDeletedMessageAttribute }) {
+            self.alpha = 0.5
+        }
     }
-    
+
     open func updateAccessibilityData(_ accessibilityData: ChatMessageAccessibilityData) {
         self.accessibilityData = accessibilityData
     }
