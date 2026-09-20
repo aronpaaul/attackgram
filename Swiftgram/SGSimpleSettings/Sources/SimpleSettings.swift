@@ -120,6 +120,7 @@ public class SGSimpleSettings {
         case hideTypingStatus
         case dontSendVoiceVideoReceipts
         case invisibleMode
+        case saveEditHistory
         case showRepostToStory
         case showRepostToStoryV2
         case contextShowSelectFromUser
@@ -288,6 +289,7 @@ public class SGSimpleSettings {
         Keys.hideTypingStatus.rawValue: false,
         Keys.dontSendVoiceVideoReceipts.rawValue: false,
         Keys.invisibleMode.rawValue: false,
+        Keys.saveEditHistory.rawValue: false,
         Keys.showRepostToStory.rawValue: true,
         Keys.contextShowSelectFromUser.rawValue: true,
         Keys.contextShowSaveToCloud.rawValue: true,
@@ -447,6 +449,9 @@ public class SGSimpleSettings {
 
     @UserDefault(key: Keys.invisibleMode.rawValue)
     public var invisibleMode: Bool
+
+    @UserDefault(key: Keys.saveEditHistory.rawValue)
+    public var saveEditHistory: Bool
 
     // @available(*, deprecated, message: "Use showRepostToStoryV2 instead")
     @UserDefault(key: Keys.showRepostToStory.rawValue)

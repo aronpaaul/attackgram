@@ -37,6 +37,10 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
             SGSimpleSettings.shared.dontSendVoiceVideoReceipts = value
             statePromise.set(true)
         },
+        toggleSaveEditHistory: { value in
+            SGSimpleSettings.shared.saveEditHistory = value
+            statePromise.set(true)
+        },
         toggleSaveDeleted: { value in
             SGSimpleSettings.shared.saveDeletedMessages = value
             statePromise.set(true)
@@ -60,6 +64,7 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
         entries.append(.hideTyping(SGSimpleSettings.shared.hideTypingStatus))
         entries.append(.dontSendRead(SGSimpleSettings.shared.dontSendReadReceipts))
         entries.append(.voiceVideoReceipts(SGSimpleSettings.shared.dontSendVoiceVideoReceipts))
+        entries.append(.saveEditHistory(SGSimpleSettings.shared.saveEditHistory))
         entries.append(.saveDeleted(SGSimpleSettings.shared.saveDeletedMessages))
         if SGSimpleSettings.shared.saveDeletedMessages {
             entries.append(.saveDeletedBots(SGSimpleSettings.shared.saveDeletedFromBots))

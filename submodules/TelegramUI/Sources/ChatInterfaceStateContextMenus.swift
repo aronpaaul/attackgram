@@ -2338,6 +2338,25 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
         }
 
         // MARK: Swiftgram
+        if let editHistory = message.attributes.first(where: { $0 is SGEditHistoryAttribute }) as? SGEditHistoryAttribute, !editHistory.texts.isEmpty {
+            let historyMessageText = message.text
+            sgActions.append(.action(ContextMenuActionItem(text: "История правок", icon: { theme in
+                return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Message"), color: theme.actionSheet.primaryTextColor)
+            }, action: { c, _ in
+                c?.dismiss(completion: {
+                    let presentationData = context.sharedContext.currentPresentationData.with { $0 }
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "dd.MM.yy HH:mm"
+                    var lines: [String] = []
+                    for index in 0 ..< editHistory.texts.count {
+                        let date = dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(editHistory.timestamps[index])))
+                        lines.append("[\(date)]\n\(editHistory.texts[index])")
+                    }
+                    lines.append("[сейчас]\n\(historyMessageText)")
+                    controllerInteraction.presentController(textAlertController(context: context, title: "История правок", text: lines.joined(separator: "\n\n"), actions: [TextAlertAction(type: .defaultAction, title: presentationData.strings.Common_OK, action: {})]), nil)
+                })
+            })))
+        }
         if !sgActions.isEmpty {
             if !actions.isEmpty {
                 if let sgActionsIndex = sgActionsIndex {

@@ -16,17 +16,19 @@ final class SGExtendedArguments {
     let toggleHideTyping: (Bool) -> Void
     let toggleDontSendRead: (Bool) -> Void
     let toggleVoiceVideoReceipts: (Bool) -> Void
+    let toggleSaveEditHistory: (Bool) -> Void
     let toggleSaveDeleted: (Bool) -> Void
     let toggleSaveDeletedBots: (Bool) -> Void
     let toggleSaveDeletedSelf: (Bool) -> Void
 
-    init(toggleUnlimitedPins: @escaping (Bool) -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void) {
+    init(toggleUnlimitedPins: @escaping (Bool) -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveEditHistory: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void) {
         self.toggleUnlimitedPins = toggleUnlimitedPins
         self.toggleInvisibleMode = toggleInvisibleMode
         self.toggleHideOnline = toggleHideOnline
         self.toggleHideTyping = toggleHideTyping
         self.toggleDontSendRead = toggleDontSendRead
         self.toggleVoiceVideoReceipts = toggleVoiceVideoReceipts
+        self.toggleSaveEditHistory = toggleSaveEditHistory
         self.toggleSaveDeleted = toggleSaveDeleted
         self.toggleSaveDeletedBots = toggleSaveDeletedBots
         self.toggleSaveDeletedSelf = toggleSaveDeletedSelf
@@ -40,6 +42,7 @@ enum SGExtendedEntry: ItemListNodeEntry {
     case hideTyping(Bool)
     case dontSendRead(Bool)
     case voiceVideoReceipts(Bool)
+    case saveEditHistory(Bool)
     case saveDeleted(Bool)
     case saveDeletedBots(Bool)
     case saveDeletedSelf(Bool)
@@ -50,7 +53,7 @@ enum SGExtendedEntry: ItemListNodeEntry {
             return SGExtendedSection.chats.rawValue
         case .invisibleMode, .hideOnline, .hideTyping, .dontSendRead, .voiceVideoReceipts:
             return SGExtendedSection.privacy.rawValue
-        case .saveDeleted, .saveDeletedBots, .saveDeletedSelf:
+        case .saveEditHistory, .saveDeleted, .saveDeletedBots, .saveDeletedSelf:
             return SGExtendedSection.deleted.rawValue
         }
     }
@@ -63,9 +66,10 @@ enum SGExtendedEntry: ItemListNodeEntry {
         case .hideTyping: return 3
         case .dontSendRead: return 4
         case .voiceVideoReceipts: return 5
-        case .saveDeleted: return 6
-        case .saveDeletedBots: return 7
-        case .saveDeletedSelf: return 8
+        case .saveEditHistory: return 6
+        case .saveDeleted: return 7
+        case .saveDeletedBots: return 8
+        case .saveDeletedSelf: return 9
         }
     }
 
@@ -88,6 +92,8 @@ enum SGExtendedEntry: ItemListNodeEntry {
             return ItemListSwitchItem(presentationData: presentationData, title: "Не отправлять прочтение", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleDontSendRead($0) })
         case let .voiceVideoReceipts(value):
             return ItemListSwitchItem(presentationData: presentationData, title: "Не отправлять «прослушано/просмотрено»", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleVoiceVideoReceipts($0) })
+        case let .saveEditHistory(value):
+            return ItemListSwitchItem(presentationData: presentationData, title: "Сохранять историю правок", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveEditHistory($0) })
         case let .saveDeleted(value):
             return ItemListSwitchItem(presentationData: presentationData, title: "Сохранять удалённые сообщения", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveDeleted($0) })
         case let .saveDeletedBots(value):

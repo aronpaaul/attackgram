@@ -4551,6 +4551,15 @@ func replayFinalState(
                         }
                     }
                     
+                    if SGSimpleSettings.shared.saveEditHistory, previousMessage.text != message.text, !previousMessage.text.isEmpty {
+                        var historyTexts = (previousMessage.attributes.first(where: { $0 is SGEditHistoryAttribute }) as? SGEditHistoryAttribute)?.texts ?? []
+                        var historyTimestamps = (previousMessage.attributes.first(where: { $0 is SGEditHistoryAttribute }) as? SGEditHistoryAttribute)?.timestamps ?? []
+                        historyTexts.append(previousMessage.text)
+                        historyTimestamps.append(previousMessage.timestamp)
+                        updatedAttributes.removeAll(where: { $0 is SGEditHistoryAttribute })
+                        updatedAttributes.append(SGEditHistoryAttribute(texts: historyTexts, timestamps: historyTimestamps))
+                    }
+
                     if let message = locallyRenderedMessage(message: message, peers: peers) {
                         generatedEvent = reactionGeneratedEvent(previousMessage.reactionsAttribute, message.reactionsAttribute, message: message, transaction: transaction)
                     }
