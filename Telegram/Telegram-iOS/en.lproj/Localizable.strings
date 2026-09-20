@@ -3996,7 +3996,7 @@ Unused sets are archived when you add more.";
 "AttachmentMenu.WebSearch" = "Web Search";
 
 "Conversation.UnsupportedMediaPlaceholder" = "This message is not supported on your version of AttackGram. Please update to the latest version.";
-"Conversation.UpdateTelegram" = "UPDATE SWIFTGRAM";
+"Conversation.UpdateTelegram" = "UPDATE ATTACKGRAM";
 
 "Cache.LowDiskSpaceText" = "Your phone has run out of available storage. Please free some space to download or upload media.";
 
@@ -7559,7 +7559,7 @@ Sorry for the inconvenience.";
 "WebApp.RemoveConfirmationText" = "Remove **%@** from the attachment menu?";
 
 "Notifications.SystemTones" = "SYSTEM TONES";
-"Notifications.TelegramTones" = "SWIFTGRAM TONES";
+"Notifications.TelegramTones" = "ATTACKGRAM TONES";
 
 "Notifications.UploadSound" = "Upload Sound";
 "Notifications.MessageSoundInfo" = "Press and hold a short voice note or mp3 file in any chat and select \"Save for Notifications\". It will appear here.";

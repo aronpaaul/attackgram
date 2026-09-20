@@ -111,6 +111,11 @@ public class SGSimpleSettings {
         case quickTranslateButton
         case outgoingLanguageTranslation
         case hideReactions
+        case unlimitedPinnedChats
+        case dontSendReadReceipts
+        case saveDeletedMessages
+        case saveDeletedFromBots
+        case saveDeletedFromSelf
         case showRepostToStory
         case showRepostToStoryV2
         case contextShowSelectFromUser
@@ -270,6 +275,11 @@ public class SGSimpleSettings {
         Keys.quickTranslateButton.rawValue: false,
         Keys.outgoingLanguageTranslation.rawValue: [:],
         Keys.hideReactions.rawValue: false,
+        Keys.unlimitedPinnedChats.rawValue: false,
+        Keys.dontSendReadReceipts.rawValue: false,
+        Keys.saveDeletedMessages.rawValue: false,
+        Keys.saveDeletedFromBots.rawValue: false,
+        Keys.saveDeletedFromSelf.rawValue: false,
         Keys.showRepostToStory.rawValue: true,
         Keys.contextShowSelectFromUser.rawValue: true,
         Keys.contextShowSaveToCloud.rawValue: true,
@@ -402,6 +412,21 @@ public class SGSimpleSettings {
     
     @UserDefault(key: Keys.hideReactions.rawValue)
     public var hideReactions: Bool
+
+    @UserDefault(key: Keys.unlimitedPinnedChats.rawValue)
+    public var unlimitedPinnedChats: Bool
+
+    @UserDefault(key: Keys.dontSendReadReceipts.rawValue)
+    public var dontSendReadReceipts: Bool
+
+    @UserDefault(key: Keys.saveDeletedMessages.rawValue)
+    public var saveDeletedMessages: Bool
+
+    @UserDefault(key: Keys.saveDeletedFromBots.rawValue)
+    public var saveDeletedFromBots: Bool
+
+    @UserDefault(key: Keys.saveDeletedFromSelf.rawValue)
+    public var saveDeletedFromSelf: Bool
 
     // @available(*, deprecated, message: "Use showRepostToStoryV2 instead")
     @UserDefault(key: Keys.showRepostToStory.rawValue)

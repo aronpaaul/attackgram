@@ -7,34 +7,50 @@ import TelegramPresentationData
 import ItemListUI
 import PresentationDataUtils
 import AccountContext
-
-private enum SGExtendedEntry: ItemListNodeEntry {
-    case placeholder
-
-    var section: ItemListSectionId {
-        return 0
-    }
-
-    var stableId: Int32 {
-        return 0
-    }
-
-    static func <(lhs: SGExtendedEntry, rhs: SGExtendedEntry) -> Bool {
-        return false
-    }
-
-    func item(presentationData: ItemListPresentationData, arguments: Any) -> ListViewItem {
-        preconditionFailure()
-    }
-}
+import SGSimpleSettings
 
 public func sgExtendedController(context: AccountContext) -> ViewController {
-    let signal = context.sharedContext.presentationData
-    |> map { presentationData -> (ItemListControllerState, (ItemListNodeState, Any)) in
+    let statePromise = ValuePromise(true, ignoreRepeated: false)
+
+    let arguments = SGExtendedArguments(
+        toggleUnlimitedPins: { value in
+            SGSimpleSettings.shared.unlimitedPinnedChats = value
+            statePromise.set(true)
+        },
+        toggleDontSendRead: { value in
+            SGSimpleSettings.shared.dontSendReadReceipts = value
+            statePromise.set(true)
+        },
+        toggleSaveDeleted: { value in
+            SGSimpleSettings.shared.saveDeletedMessages = value
+            statePromise.set(true)
+        },
+        toggleSaveDeletedBots: { value in
+            SGSimpleSettings.shared.saveDeletedFromBots = value
+            statePromise.set(true)
+        },
+        toggleSaveDeletedSelf: { value in
+            SGSimpleSettings.shared.saveDeletedFromSelf = value
+            statePromise.set(true)
+        }
+    )
+
+    let signal = combineLatest(context.sharedContext.presentationData, statePromise.get())
+    |> map { presentationData, _ -> (ItemListControllerState, (ItemListNodeState, Any)) in
+        var entries: [SGExtendedEntry] = []
+        entries.append(.unlimitedPins(SGSimpleSettings.shared.unlimitedPinnedChats))
+        entries.append(.dontSendRead(SGSimpleSettings.shared.dontSendReadReceipts))
+        entries.append(.saveDeleted(SGSimpleSettings.shared.saveDeletedMessages))
+        if SGSimpleSettings.shared.saveDeletedMessages {
+            entries.append(.saveDeletedBots(SGSimpleSettings.shared.saveDeletedFromBots))
+            entries.append(.saveDeletedSelf(SGSimpleSettings.shared.saveDeletedFromSelf))
+        }
+
         let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("Extended"), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
-        let emptyItem = SGExtendedEmptyStateItem(theme: presentationData.theme, text: "Здесь появятся расширенные модули AttackGram.\nПока их нет.")
-        let listState = ItemListNodeState(presentationData: ItemListPresentationData(presentationData), entries: [] as [SGExtendedEntry], style: .blocks, emptyStateItem: emptyItem)
-        return (controllerState, (listState, ()))
+        let emptyItem: ItemListControllerEmptyStateItem? = entries.isEmpty ? SGExtendedEmptyStateItem(theme: presentationData.theme, text: "Здесь появятся расширенные модули AttackGram.\nПока их нет.") : nil
+        let listState = ItemListNodeState(presentationData: ItemListPresentationData(presentationData), entries: entries, style: .blocks, emptyStateItem: emptyItem)
+        return (controllerState, (listState, arguments))
     }
+
     return ItemListController(context: context, state: signal)
 }

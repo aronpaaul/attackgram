@@ -224,8 +224,10 @@ func settingsItems(showProfileId: Bool, data: PeerInfoScreenData?, context: Acco
     
     let sgWebSettings = context.currentAppConfiguration.with({ $0 }).sgWebSettings
     let _ = sgWebSettings
-    let _ = swiftgramLabel
     let _ = swiftgramProLabel
+    items[.swiftgram]!.append(PeerInfoScreenDisclosureItem(id: 1, label: swiftgramLabel, text: "AttackGram", icon: PresentationResourcesSettings.swiftgram, action: {
+        interaction.openSettings(.swiftgram)
+    }))
     items[.developers]!.append(PeerInfoScreenDisclosureItem(id: 0, text: "Разработчики", icon: PresentationResourcesSettings.swiftgram, action: {
         interaction.openSettings(.developers)
     }))
