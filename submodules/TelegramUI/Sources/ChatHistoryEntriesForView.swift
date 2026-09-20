@@ -2,6 +2,7 @@ import Foundation
 import UIKit
 import Postbox
 import TelegramCore
+import SGSimpleSettings
 import TemporaryCachedPeerDataManager
 import Emoji
 import AccountContext
@@ -144,7 +145,14 @@ func chatHistoryEntriesForView(
     loop: for entry in view.entries {
         var message = entry.message
         var isRead = entry.isRead
-        
+
+        if !SGSimpleSettings.shared.ignoredPeerIds.isEmpty, let author = message.author, SGSimpleSettings.shared.ignoredPeerIds.contains("\(author.id.toInt64())") {
+            let ignoredPlaceholder = "Пользователь в игноре"
+            var ignoredAttributes = message.attributes.filter { !($0 is TextEntitiesMessageAttribute) }
+            ignoredAttributes.append(TextEntitiesMessageAttribute(entities: [MessageTextEntity(range: 0 ..< (ignoredPlaceholder as NSString).length, type: .Italic)]))
+            message = message.withUpdatedText(ignoredPlaceholder).withUpdatedMedia([]).withUpdatedAttributes(ignoredAttributes)
+        }
+
         var pinToTop = false
         if message.stableId == pinToTopStableId {
             pinToTop = true

@@ -25,6 +25,9 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
         openThemes: {
             pushControllerImpl?(sgThemesController(context: context))
         },
+        openIgnored: {
+            pushControllerImpl?(sgIgnoredController(context: context))
+        },
         toggleInvisibleMode: { value in
             SGSimpleSettings.shared.invisibleMode = value
             statePromise.set(true)
@@ -85,6 +88,7 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
         items.append(.hideTyping("Скрывать «печатает…»", SGSimpleSettings.shared.hideTypingStatus))
         items.append(.dontSendRead("Не отправлять прочтение", SGSimpleSettings.shared.dontSendReadReceipts))
         items.append(.voiceVideoReceipts("Не отправлять «прослушано/просмотрено»", SGSimpleSettings.shared.dontSendVoiceVideoReceipts))
+        items.append(.ignoredList("Игнор-лист"))
         items.append(.saveEditHistory("Сохранять историю правок", SGSimpleSettings.shared.saveEditHistory))
         items.append(.saveDeleted("Сохранять удалённые сообщения", SGSimpleSettings.shared.saveDeletedMessages))
         if SGSimpleSettings.shared.saveDeletedMessages {

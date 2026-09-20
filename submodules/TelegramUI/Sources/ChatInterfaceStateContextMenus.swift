@@ -2358,6 +2358,23 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                 })
             })))
         }
+        if let ignoreAuthor = message.author, ignoreAuthor.id != context.account.peerId, ignoreAuthor.id.namespace == Namespaces.Peer.CloudUser {
+            let ignoreKey = "\(ignoreAuthor.id.toInt64())"
+            let isIgnored = SGSimpleSettings.shared.ignoredPeerIds.contains(ignoreKey)
+            actions.append(.separator)
+            actions.append(.action(ContextMenuActionItem(text: isIgnored ? "Убрать из игнора" : "Игнорировать пользователя", textColor: isIgnored ? .primary : .destructive, icon: { theme in
+                return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Restrict"), color: isIgnored ? theme.actionSheet.primaryTextColor : theme.actionSheet.destructiveActionTextColor)
+            }, action: { _, f in
+                var ids = SGSimpleSettings.shared.ignoredPeerIds
+                if isIgnored {
+                    ids.removeAll(where: { $0 == ignoreKey })
+                } else {
+                    ids.append(ignoreKey)
+                }
+                SGSimpleSettings.shared.ignoredPeerIds = ids
+                f(.default)
+            })))
+        }
         if !sgActions.isEmpty {
             if !actions.isEmpty {
                 if let sgActionsIndex = sgActionsIndex {

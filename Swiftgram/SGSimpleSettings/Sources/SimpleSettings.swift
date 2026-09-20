@@ -124,6 +124,7 @@ public class SGSimpleSettings {
         case chatNotes
         case deletedMessageKeys
         case editedMessageKeys
+        case ignoredPeerIds
         case showRepostToStory
         case showRepostToStoryV2
         case contextShowSelectFromUser
@@ -296,6 +297,7 @@ public class SGSimpleSettings {
         Keys.chatNotes.rawValue: [:],
         Keys.deletedMessageKeys.rawValue: [],
         Keys.editedMessageKeys.rawValue: [],
+        Keys.ignoredPeerIds.rawValue: [],
         Keys.showRepostToStory.rawValue: true,
         Keys.contextShowSelectFromUser.rawValue: true,
         Keys.contextShowSaveToCloud.rawValue: true,
@@ -466,6 +468,9 @@ public class SGSimpleSettings {
 
     @UserDefault(key: Keys.editedMessageKeys.rawValue)
     public var editedMessageKeys: [String]
+
+    @UserDefault(key: Keys.ignoredPeerIds.rawValue)
+    public var ignoredPeerIds: [String]
 
     // @available(*, deprecated, message: "Use showRepostToStoryV2 instead")
     @UserDefault(key: Keys.showRepostToStory.rawValue)

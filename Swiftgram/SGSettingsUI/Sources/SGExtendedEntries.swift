@@ -22,6 +22,7 @@ final class SGExtendedArguments {
     let updateSearch: (String) -> Void
     let toggleUnlimitedPins: (Bool) -> Void
     let openThemes: () -> Void
+    let openIgnored: () -> Void
     let toggleInvisibleMode: (Bool) -> Void
     let toggleHideOnline: (Bool) -> Void
     let toggleHideTyping: (Bool) -> Void
@@ -34,10 +35,11 @@ final class SGExtendedArguments {
     let clearDeleted: () -> Void
     let clearEdited: () -> Void
 
-    init(updateSearch: @escaping (String) -> Void, toggleUnlimitedPins: @escaping (Bool) -> Void, openThemes: @escaping () -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveEditHistory: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void, clearDeleted: @escaping () -> Void, clearEdited: @escaping () -> Void) {
+    init(updateSearch: @escaping (String) -> Void, toggleUnlimitedPins: @escaping (Bool) -> Void, openThemes: @escaping () -> Void, openIgnored: @escaping () -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveEditHistory: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void, clearDeleted: @escaping () -> Void, clearEdited: @escaping () -> Void) {
         self.updateSearch = updateSearch
         self.toggleUnlimitedPins = toggleUnlimitedPins
         self.openThemes = openThemes
+        self.openIgnored = openIgnored
         self.toggleInvisibleMode = toggleInvisibleMode
         self.toggleHideOnline = toggleHideOnline
         self.toggleHideTyping = toggleHideTyping
@@ -61,6 +63,7 @@ enum SGExtendedEntry: ItemListNodeEntry {
     case hideTyping(String, Bool)
     case dontSendRead(String, Bool)
     case voiceVideoReceipts(String, Bool)
+    case ignoredList(String)
     case saveEditHistory(String, Bool)
     case saveDeleted(String, Bool)
     case saveDeletedBots(String, Bool)
@@ -76,7 +79,7 @@ enum SGExtendedEntry: ItemListNodeEntry {
             return SGExtendedSection.chats.rawValue
         case .themes:
             return SGExtendedSection.themes.rawValue
-        case .invisibleMode, .hideOnline, .hideTyping, .dontSendRead, .voiceVideoReceipts:
+        case .invisibleMode, .hideOnline, .hideTyping, .dontSendRead, .voiceVideoReceipts, .ignoredList:
             return SGExtendedSection.privacy.rawValue
         case .saveEditHistory, .saveDeleted, .saveDeletedBots, .saveDeletedSelf:
             return SGExtendedSection.deleted.rawValue
@@ -95,19 +98,20 @@ enum SGExtendedEntry: ItemListNodeEntry {
         case .hideTyping: return 5
         case .dontSendRead: return 6
         case .voiceVideoReceipts: return 7
-        case .saveEditHistory: return 8
-        case .saveDeleted: return 9
-        case .saveDeletedBots: return 10
-        case .saveDeletedSelf: return 11
-        case .clearDeleted: return 12
-        case .clearEdited: return 13
+        case .ignoredList: return 8
+        case .saveEditHistory: return 9
+        case .saveDeleted: return 10
+        case .saveDeletedBots: return 11
+        case .saveDeletedSelf: return 12
+        case .clearDeleted: return 13
+        case .clearEdited: return 14
         }
     }
 
     var searchableTitle: String {
         switch self {
         case .search: return ""
-        case let .unlimitedPins(title, _), let .themes(title), let .invisibleMode(title, _), let .hideOnline(title, _), let .hideTyping(title, _), let .dontSendRead(title, _), let .voiceVideoReceipts(title, _), let .saveEditHistory(title, _), let .saveDeleted(title, _), let .saveDeletedBots(title, _), let .saveDeletedSelf(title, _), let .clearDeleted(title), let .clearEdited(title):
+        case let .unlimitedPins(title, _), let .themes(title), let .ignoredList(title), let .invisibleMode(title, _), let .hideOnline(title, _), let .hideTyping(title, _), let .dontSendRead(title, _), let .voiceVideoReceipts(title, _), let .saveEditHistory(title, _), let .saveDeleted(title, _), let .saveDeletedBots(title, _), let .saveDeletedSelf(title, _), let .clearDeleted(title), let .clearEdited(title):
             return title
         }
     }
@@ -137,6 +141,8 @@ enum SGExtendedEntry: ItemListNodeEntry {
             return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleDontSendRead($0) })
         case let .voiceVideoReceipts(title, value):
             return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleVoiceVideoReceipts($0) })
+        case let .ignoredList(title):
+            return ItemListDisclosureItem(presentationData: presentationData, title: title, label: "", sectionId: self.section, style: .blocks, action: { arguments.openIgnored() })
         case let .saveEditHistory(title, value):
             return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveEditHistory($0) })
         case let .saveDeleted(title, value):
