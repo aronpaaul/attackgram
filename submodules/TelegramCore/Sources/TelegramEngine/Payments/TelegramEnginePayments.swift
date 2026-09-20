@@ -140,6 +140,7 @@ public extension TelegramEngine {
         public func saveFakeSentGift(toPeerId: EnginePeer.Id, gift: StarGift, text: String?) {
             let stored = _internal_makeFakeSentGift(gift: gift, fromPeerId: self.account.peerId, text: text)
             SGFakeGiftsStore.add(gift: stored, forPeerId: toPeerId.toInt64())
+            let _ = _internal_addFakeGiftMessage(account: self.account, toPeerId: toPeerId, gift: gift, text: text).start()
         }
         
         public func upgradeStarGift(formId: Int64?, reference: StarGiftReference, keepOriginalInfo: Bool) -> Signal<ProfileGiftsContext.State.StarGift, UpgradeStarGiftError> {

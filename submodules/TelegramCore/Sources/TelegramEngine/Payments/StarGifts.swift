@@ -1522,6 +1522,23 @@ func _internal_makeFakeSentGift(gift: StarGift, fromPeerId: EnginePeer.Id, text:
     )
 }
 
+func _internal_addFakeGiftMessage(account: Account, toPeerId: EnginePeer.Id, gift: StarGift, text: String?) -> Signal<Never, NoError> {
+    return account.postbox.transaction { transaction -> Void in
+        let actionType: TelegramMediaActionType
+        switch gift {
+        case .generic:
+            actionType = .starGift(gift: gift, convertStars: nil, text: text, entities: nil, nameHidden: false, savedToProfile: true, converted: false, upgraded: false, canUpgrade: false, upgradeStars: nil, isRefunded: false, isPrepaidUpgrade: false, upgradeMessageId: nil, peerId: toPeerId, senderId: account.peerId, savedId: nil, prepaidUpgradeHash: nil, giftMessageId: nil, upgradeSeparate: false, isAuctionAcquired: false, toPeerId: toPeerId, number: nil)
+        case .unique:
+            actionType = .starGiftUnique(gift: gift, isUpgrade: false, isTransferred: false, savedToProfile: true, canExportDate: nil, transferStars: nil, isRefunded: false, isPrepaidUpgrade: false, peerId: toPeerId, senderId: account.peerId, savedId: nil, resaleAmount: nil, canTransferDate: nil, canResaleDate: nil, dropOriginalDetailsStars: nil, assigned: false, fromOffer: false, canCraftAt: nil, isCrafted: false)
+        }
+        let randomId = Int64.random(in: Int64.min ... Int64.max)
+        let timestamp = Int32(Date().timeIntervalSince1970)
+        let message = StoreMessage(peerId: toPeerId, namespace: Namespaces.Message.Local, customStableId: nil, globallyUniqueId: randomId, groupingKey: nil, threadId: nil, timestamp: timestamp, flags: StoreMessageFlags(), tags: [], globalTags: [], localTags: [], forwardInfo: nil, authorId: account.peerId, text: "", attributes: [], media: [TelegramMediaAction(action: actionType)])
+        let _ = transaction.addMessages([message], location: .Random)
+    }
+    |> ignoreValues
+}
+
 func _internal_buyStarGift(account: Account, slug: String, peerId: EnginePeer.Id, price: CurrencyAmount?) -> Signal<Never, BuyStarGiftError> {
     let source: BotPaymentInvoiceSource = .starGiftResale(slug: slug, toPeerId: peerId, ton: price?.currency == .ton)
     return _internal_fetchBotPaymentForm(accountPeerId: account.peerId, postbox: account.postbox, network: account.network, source: source, themeParams: nil)

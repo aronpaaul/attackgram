@@ -1109,11 +1109,15 @@ public final class StarsContext {
             self.impl.with { impl in
                 let contextTon = self.ton
                 disposable.set(impl.state.start(next: { value in
-                    if SGSimpleSettings.shared.fakeBalanceEnabled, var value = value {
+                    if SGSimpleSettings.shared.fakeBalanceEnabled {
                         let fakeSource = contextTon ? SGSimpleSettings.shared.fakeTonBalance : SGSimpleSettings.shared.fakeStarsBalance
                         if let fakeValue = Int64(fakeSource) {
-                            value.balance = StarsAmount(value: fakeValue, nanos: 0)
-                            subscriber.putNext(value)
+                            if var value = value {
+                                value.balance = StarsAmount(value: fakeValue, nanos: 0)
+                                subscriber.putNext(value)
+                            } else {
+                                subscriber.putNext(StarsContext.State(flags: [], balance: StarsAmount(value: fakeValue, nanos: 0), subscriptions: [], canLoadMoreSubscriptions: false, transactions: [], canLoadMoreTransactions: false, isLoading: false))
+                            }
                             return
                         }
                     }
@@ -1139,11 +1143,15 @@ public final class StarsContext {
         self.impl.syncWith { impl in
             state = impl._state
         }
-        if SGSimpleSettings.shared.fakeBalanceEnabled, var value = state {
+        if SGSimpleSettings.shared.fakeBalanceEnabled {
             let fakeSource = self.ton ? SGSimpleSettings.shared.fakeTonBalance : SGSimpleSettings.shared.fakeStarsBalance
             if let fakeValue = Int64(fakeSource) {
-                value.balance = StarsAmount(value: fakeValue, nanos: 0)
-                return value
+                if var value = state {
+                    value.balance = StarsAmount(value: fakeValue, nanos: 0)
+                    return value
+                } else {
+                    return StarsContext.State(flags: [], balance: StarsAmount(value: fakeValue, nanos: 0), subscriptions: [], canLoadMoreSubscriptions: false, transactions: [], canLoadMoreTransactions: false, isLoading: false)
+                }
             }
         }
         return state
