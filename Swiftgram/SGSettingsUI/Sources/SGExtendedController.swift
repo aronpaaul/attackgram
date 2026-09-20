@@ -11,9 +11,13 @@ import SGSimpleSettings
 
 public func sgExtendedController(context: AccountContext) -> ViewController {
     let statePromise = ValuePromise(true, ignoreRepeated: false)
+    let searchPromise = ValuePromise<String>("", ignoreRepeated: true)
     var pushControllerImpl: ((ViewController) -> Void)?
 
     let arguments = SGExtendedArguments(
+        updateSearch: { value in
+            searchPromise.set(value)
+        },
         toggleUnlimitedPins: { value in
             SGSimpleSettings.shared.unlimitedPinnedChats = value
             statePromise.set(true)
@@ -67,24 +71,34 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
         }
     )
 
-    let signal = combineLatest(context.sharedContext.presentationData, statePromise.get())
-    |> map { presentationData, _ -> (ItemListControllerState, (ItemListNodeState, Any)) in
+    let signal = combineLatest(context.sharedContext.presentationData, statePromise.get(), searchPromise.get())
+    |> map { presentationData, _, searchQuery -> (ItemListControllerState, (ItemListNodeState, Any)) in
+        let strings = presentationData.strings
         var entries: [SGExtendedEntry] = []
-        entries.append(.unlimitedPins(SGSimpleSettings.shared.unlimitedPinnedChats))
-        entries.append(.themes)
-        entries.append(.invisibleMode(SGSimpleSettings.shared.invisibleMode))
-        entries.append(.hideOnline(SGSimpleSettings.shared.hideOnlineStatus))
-        entries.append(.hideTyping(SGSimpleSettings.shared.hideTypingStatus))
-        entries.append(.dontSendRead(SGSimpleSettings.shared.dontSendReadReceipts))
-        entries.append(.voiceVideoReceipts(SGSimpleSettings.shared.dontSendVoiceVideoReceipts))
-        entries.append(.saveEditHistory(SGSimpleSettings.shared.saveEditHistory))
-        entries.append(.saveDeleted(SGSimpleSettings.shared.saveDeletedMessages))
+        entries.append(.search(strings.Common_Search, searchQuery))
+
+        var items: [SGExtendedEntry] = []
+        items.append(.unlimitedPins("Безлимитный закреп чатов", SGSimpleSettings.shared.unlimitedPinnedChats))
+        items.append(.themes("Готовые темы"))
+        items.append(.invisibleMode("Невидимый режим", SGSimpleSettings.shared.invisibleMode))
+        items.append(.hideOnline("Скрывать статус «в сети»", SGSimpleSettings.shared.hideOnlineStatus))
+        items.append(.hideTyping("Скрывать «печатает…»", SGSimpleSettings.shared.hideTypingStatus))
+        items.append(.dontSendRead("Не отправлять прочтение", SGSimpleSettings.shared.dontSendReadReceipts))
+        items.append(.voiceVideoReceipts("Не отправлять «прослушано/просмотрено»", SGSimpleSettings.shared.dontSendVoiceVideoReceipts))
+        items.append(.saveEditHistory("Сохранять историю правок", SGSimpleSettings.shared.saveEditHistory))
+        items.append(.saveDeleted("Сохранять удалённые сообщения", SGSimpleSettings.shared.saveDeletedMessages))
         if SGSimpleSettings.shared.saveDeletedMessages {
-            entries.append(.saveDeletedBots(SGSimpleSettings.shared.saveDeletedFromBots))
-            entries.append(.saveDeletedSelf(SGSimpleSettings.shared.saveDeletedFromSelf))
+            items.append(.saveDeletedBots("Удалённые в ботах", SGSimpleSettings.shared.saveDeletedFromBots))
+            items.append(.saveDeletedSelf("Удалённые от себя", SGSimpleSettings.shared.saveDeletedFromSelf))
         }
-        entries.append(.clearDeleted)
-        entries.append(.clearEdited)
+        items.append(.clearDeleted("Очистить историю удалённых"))
+        items.append(.clearEdited("Очистить историю правок"))
+
+        let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if !trimmedQuery.isEmpty {
+            items = items.filter { $0.searchableTitle.lowercased().contains(trimmedQuery) }
+        }
+        entries.append(contentsOf: items)
 
         let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("Extended"), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
         let listState = ItemListNodeState(presentationData: ItemListPresentationData(presentationData), entries: entries, style: .blocks)

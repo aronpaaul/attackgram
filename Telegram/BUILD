@@ -1929,6 +1929,7 @@ apple_prebuilt_watchos_application(
 
 ios_application(
     name = "Swiftgram",
+    bundle_name = "AttackGram",
     bundle_id = "{telegram_bundle_id}".format(
         telegram_bundle_id = telegram_bundle_id,
     ),
@@ -1946,7 +1947,7 @@ ios_application(
         ":RequiredDeviceCapabilitiesPlist",
         ":UrlTypesInfoPlist",
     ],
-    app_icons = [ ":{}_icon".format(name) for name in composer_icon_folders ],
+    app_icons = [ ":DefaultAppIcon" ],
     alternate_icons = [
         ":{}".format(name) for name in alternate_icon_folders
     ],

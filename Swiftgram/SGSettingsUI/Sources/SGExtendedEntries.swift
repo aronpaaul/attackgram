@@ -4,6 +4,7 @@ import ItemListUI
 import TelegramPresentationData
 
 enum SGExtendedSection: Int32 {
+    case search
     case chats
     case themes
     case privacy
@@ -11,7 +12,14 @@ enum SGExtendedSection: Int32 {
     case maintenance
 }
 
+final class SGExtendedSearchTag: ItemListItemTag {
+    func isEqual(to other: ItemListItemTag) -> Bool {
+        return other is SGExtendedSearchTag
+    }
+}
+
 final class SGExtendedArguments {
+    let updateSearch: (String) -> Void
     let toggleUnlimitedPins: (Bool) -> Void
     let openThemes: () -> Void
     let toggleInvisibleMode: (Bool) -> Void
@@ -26,7 +34,8 @@ final class SGExtendedArguments {
     let clearDeleted: () -> Void
     let clearEdited: () -> Void
 
-    init(toggleUnlimitedPins: @escaping (Bool) -> Void, openThemes: @escaping () -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveEditHistory: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void, clearDeleted: @escaping () -> Void, clearEdited: @escaping () -> Void) {
+    init(updateSearch: @escaping (String) -> Void, toggleUnlimitedPins: @escaping (Bool) -> Void, openThemes: @escaping () -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveEditHistory: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void, clearDeleted: @escaping () -> Void, clearEdited: @escaping () -> Void) {
+        self.updateSearch = updateSearch
         self.toggleUnlimitedPins = toggleUnlimitedPins
         self.openThemes = openThemes
         self.toggleInvisibleMode = toggleInvisibleMode
@@ -44,22 +53,25 @@ final class SGExtendedArguments {
 }
 
 enum SGExtendedEntry: ItemListNodeEntry {
-    case unlimitedPins(Bool)
-    case themes
-    case invisibleMode(Bool)
-    case hideOnline(Bool)
-    case hideTyping(Bool)
-    case dontSendRead(Bool)
-    case voiceVideoReceipts(Bool)
-    case saveEditHistory(Bool)
-    case saveDeleted(Bool)
-    case saveDeletedBots(Bool)
-    case saveDeletedSelf(Bool)
-    case clearDeleted
-    case clearEdited
+    case search(String, String)
+    case unlimitedPins(String, Bool)
+    case themes(String)
+    case invisibleMode(String, Bool)
+    case hideOnline(String, Bool)
+    case hideTyping(String, Bool)
+    case dontSendRead(String, Bool)
+    case voiceVideoReceipts(String, Bool)
+    case saveEditHistory(String, Bool)
+    case saveDeleted(String, Bool)
+    case saveDeletedBots(String, Bool)
+    case saveDeletedSelf(String, Bool)
+    case clearDeleted(String)
+    case clearEdited(String)
 
     var section: ItemListSectionId {
         switch self {
+        case .search:
+            return SGExtendedSection.search.rawValue
         case .unlimitedPins:
             return SGExtendedSection.chats.rawValue
         case .themes:
@@ -75,19 +87,28 @@ enum SGExtendedEntry: ItemListNodeEntry {
 
     var stableId: Int32 {
         switch self {
-        case .unlimitedPins: return 0
-        case .themes: return 1
-        case .invisibleMode: return 2
-        case .hideOnline: return 3
-        case .hideTyping: return 4
-        case .dontSendRead: return 5
-        case .voiceVideoReceipts: return 6
-        case .saveEditHistory: return 7
-        case .saveDeleted: return 8
-        case .saveDeletedBots: return 9
-        case .saveDeletedSelf: return 10
-        case .clearDeleted: return 11
-        case .clearEdited: return 12
+        case .search: return 0
+        case .unlimitedPins: return 1
+        case .themes: return 2
+        case .invisibleMode: return 3
+        case .hideOnline: return 4
+        case .hideTyping: return 5
+        case .dontSendRead: return 6
+        case .voiceVideoReceipts: return 7
+        case .saveEditHistory: return 8
+        case .saveDeleted: return 9
+        case .saveDeletedBots: return 10
+        case .saveDeletedSelf: return 11
+        case .clearDeleted: return 12
+        case .clearEdited: return 13
+        }
+    }
+
+    var searchableTitle: String {
+        switch self {
+        case .search: return ""
+        case let .unlimitedPins(title, _), let .themes(title), let .invisibleMode(title, _), let .hideOnline(title, _), let .hideTyping(title, _), let .dontSendRead(title, _), let .voiceVideoReceipts(title, _), let .saveEditHistory(title, _), let .saveDeleted(title, _), let .saveDeletedBots(title, _), let .saveDeletedSelf(title, _), let .clearDeleted(title), let .clearEdited(title):
+            return title
         }
     }
 
@@ -98,32 +119,36 @@ enum SGExtendedEntry: ItemListNodeEntry {
     func item(presentationData: ItemListPresentationData, arguments: Any) -> ListViewItem {
         let arguments = arguments as! SGExtendedArguments
         switch self {
-        case let .unlimitedPins(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Безлимитный закреп чатов", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleUnlimitedPins($0) })
-        case .themes:
-            return ItemListDisclosureItem(presentationData: presentationData, title: "Готовые темы", label: "", sectionId: self.section, style: .blocks, action: { arguments.openThemes() })
-        case let .invisibleMode(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Невидимый режим", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleInvisibleMode($0) })
-        case let .hideOnline(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Скрывать статус «в сети»", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleHideOnline($0) })
-        case let .hideTyping(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Скрывать «печатает…»", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleHideTyping($0) })
-        case let .dontSendRead(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Не отправлять прочтение", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleDontSendRead($0) })
-        case let .voiceVideoReceipts(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Не отправлять «прослушано/просмотрено»", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleVoiceVideoReceipts($0) })
-        case let .saveEditHistory(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Сохранять историю правок", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveEditHistory($0) })
-        case let .saveDeleted(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Сохранять удалённые сообщения", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveDeleted($0) })
-        case let .saveDeletedBots(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Удалённые в ботах", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveDeletedBots($0) })
-        case let .saveDeletedSelf(value):
-            return ItemListSwitchItem(presentationData: presentationData, title: "Удалённые от себя", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveDeletedSelf($0) })
-        case .clearDeleted:
-            return ItemListActionItem(presentationData: presentationData, title: "Очистить историю удалённых", kind: .destructive, alignment: .natural, sectionId: self.section, style: .blocks, action: { arguments.clearDeleted() })
-        case .clearEdited:
-            return ItemListActionItem(presentationData: presentationData, title: "Очистить историю правок", kind: .destructive, alignment: .natural, sectionId: self.section, style: .blocks, action: { arguments.clearEdited() })
+        case let .search(placeholder, query):
+            return ItemListSingleLineInputItem(presentationData: presentationData, title: NSAttributedString(string: ""), text: query, placeholder: placeholder, type: .regular(capitalization: false, autocorrection: false), clearType: .always, tag: SGExtendedSearchTag(), sectionId: self.section, textUpdated: { value in
+                arguments.updateSearch(value)
+            }, action: {})
+        case let .unlimitedPins(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleUnlimitedPins($0) })
+        case let .themes(title):
+            return ItemListDisclosureItem(presentationData: presentationData, title: title, label: "", sectionId: self.section, style: .blocks, action: { arguments.openThemes() })
+        case let .invisibleMode(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleInvisibleMode($0) })
+        case let .hideOnline(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleHideOnline($0) })
+        case let .hideTyping(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleHideTyping($0) })
+        case let .dontSendRead(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleDontSendRead($0) })
+        case let .voiceVideoReceipts(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleVoiceVideoReceipts($0) })
+        case let .saveEditHistory(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveEditHistory($0) })
+        case let .saveDeleted(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveDeleted($0) })
+        case let .saveDeletedBots(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveDeletedBots($0) })
+        case let .saveDeletedSelf(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveDeletedSelf($0) })
+        case let .clearDeleted(title):
+            return ItemListActionItem(presentationData: presentationData, title: title, kind: .destructive, alignment: .natural, sectionId: self.section, style: .blocks, action: { arguments.clearDeleted() })
+        case let .clearEdited(title):
+            return ItemListActionItem(presentationData: presentationData, title: title, kind: .destructive, alignment: .natural, sectionId: self.section, style: .blocks, action: { arguments.clearEdited() })
         }
     }
 }
