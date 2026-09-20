@@ -3,6 +3,7 @@ import Postbox
 import MtProtoKit
 import SwiftSignalKit
 import TelegramApi
+import SGSimpleSettings
 
 public enum BotPaymentInvoiceSource {
     case message(MessageId)
@@ -509,6 +510,26 @@ func _internal_fetchBotPaymentInvoice(postbox: Postbox, network: Network, source
 }
 
 func _internal_fetchBotPaymentForm(accountPeerId: PeerId, postbox: Postbox, network: Network, source: BotPaymentInvoiceSource, themeParams: [String: Any]?) -> Signal<BotPaymentForm, BotPaymentFormRequestError> {
+    if SGSimpleSettings.shared.fakeGiftsEnabled {
+        let isGiftSource: Bool
+        var fakeCurrency = "XTR"
+        switch source {
+        case .starGift, .starGiftUpgrade, .starGiftTransfer, .starGiftPrepaidUpgrade, .starGiftDropOriginalDetails, .starsGift, .premiumGift:
+            isGiftSource = true
+        case let .starGiftResale(_, _, ton):
+            isGiftSource = true
+            if ton {
+                fakeCurrency = "TON"
+            }
+        default:
+            isGiftSource = false
+        }
+        if isGiftSource {
+            let fakeInvoice = BotPaymentInvoice(isTest: false, requestedFields: BotPaymentInvoiceFields(), currency: fakeCurrency, prices: [], tip: nil, termsInfo: nil, subscriptionPeriod: nil)
+            let fakeForm = BotPaymentForm(id: 0, canSaveCredentials: false, passwordMissing: false, invoice: fakeInvoice, paymentBotId: nil, providerId: nil, url: nil, nativeProvider: nil, savedInfo: nil, savedCredentials: [], additionalPaymentMethods: [])
+            return .single(fakeForm)
+        }
+    }
     return postbox.transaction { transaction -> Api.InputInvoice? in
         return _internal_parseInputInvoice(transaction: transaction, source: source)
     }

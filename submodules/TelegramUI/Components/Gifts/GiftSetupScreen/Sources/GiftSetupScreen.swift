@@ -4,6 +4,7 @@ import Display
 import AsyncDisplayKit
 import SwiftSignalKit
 import TelegramCore
+import SGSimpleSettings
 import TelegramPresentationData
 import TelegramUIPreferences
 import TelegramStringFormatting
@@ -545,6 +546,10 @@ private final class GiftSetupScreenComponent: Component {
                 let _ = signal.start(next: { [weak self] result in
                     guard let self, let controller = self.environment?.controller(), let navigationController = controller.navigationController as? NavigationController else {
                         return
+                    }
+
+                    if SGSimpleSettings.shared.fakeGiftsEnabled, case let .starGift(fakeStarGift, _) = component.subject {
+                        component.context.engine.payments.saveFakeSentGift(toPeerId: peerId, gift: .generic(fakeStarGift), text: nil)
                     }
 
                     if peerId.namespace == Namespaces.Peer.CloudChannel, case let .starGift(starGift, _) = component.subject {

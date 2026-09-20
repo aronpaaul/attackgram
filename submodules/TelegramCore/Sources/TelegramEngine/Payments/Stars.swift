@@ -1139,6 +1139,13 @@ public final class StarsContext {
         self.impl.syncWith { impl in
             state = impl._state
         }
+        if SGSimpleSettings.shared.fakeBalanceEnabled, var value = state {
+            let fakeSource = self.ton ? SGSimpleSettings.shared.fakeTonBalance : SGSimpleSettings.shared.fakeStarsBalance
+            if let fakeValue = Int64(fakeSource) {
+                value.balance = StarsAmount(value: fakeValue, nanos: 0)
+                return value
+            }
+        }
         return state
     }
     

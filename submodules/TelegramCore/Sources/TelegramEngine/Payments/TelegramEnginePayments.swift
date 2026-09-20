@@ -136,6 +136,11 @@ public extension TelegramEngine {
         public func buyStarGift(slug: String, peerId: EnginePeer.Id, price: CurrencyAmount?) -> Signal<Never, BuyStarGiftError> {
             return _internal_buyStarGift(account: self.account, slug: slug, peerId: peerId, price: price)
         }
+
+        public func saveFakeSentGift(toPeerId: EnginePeer.Id, gift: StarGift, text: String?) {
+            let stored = _internal_makeFakeSentGift(gift: gift, fromPeerId: self.account.peerId, text: text)
+            SGFakeGiftsStore.add(gift: stored, forPeerId: toPeerId.toInt64())
+        }
         
         public func upgradeStarGift(formId: Int64?, reference: StarGiftReference, keepOriginalInfo: Bool) -> Signal<ProfileGiftsContext.State.StarGift, UpgradeStarGiftError> {
             return _internal_upgradeStarGift(account: self.account, formId: formId, reference: reference, keepOriginalInfo: keepOriginalInfo)

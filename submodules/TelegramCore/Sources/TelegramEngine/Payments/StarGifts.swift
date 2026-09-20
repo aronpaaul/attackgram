@@ -3,6 +3,7 @@ import Postbox
 import MtProtoKit
 import SwiftSignalKit
 import TelegramApi
+import SGSimpleSettings
 
 public final class StarGiftsList: Codable, Equatable {
     public let items: [StarGift]
@@ -1489,6 +1490,38 @@ public enum UpgradeStarGiftError {
     case generic
 }
 
+func _internal_makeFakeSentGift(gift: StarGift, fromPeerId: EnginePeer.Id, text: String?) -> ProfileGiftsContext.State.StarGift {
+    var number: Int32?
+    if case let .unique(uniqueGift) = gift {
+        number = uniqueGift.number
+    }
+    return ProfileGiftsContext.State.StarGift(
+        gift: gift,
+        reference: nil,
+        fromPeer: nil,
+        date: Int32(Date().timeIntervalSince1970),
+        text: text,
+        entities: nil,
+        nameHidden: false,
+        savedToProfile: true,
+        pinnedToTop: false,
+        convertStars: nil,
+        canUpgrade: false,
+        canExportDate: nil,
+        upgradeStars: nil,
+        transferStars: nil,
+        canTransferDate: nil,
+        canResaleDate: nil,
+        collectionIds: nil,
+        prepaidUpgradeHash: nil,
+        upgradeSeparate: false,
+        dropOriginalDetailsStars: nil,
+        number: number,
+        isRefunded: false,
+        canCraftAt: nil
+    )
+}
+
 func _internal_buyStarGift(account: Account, slug: String, peerId: EnginePeer.Id, price: CurrencyAmount?) -> Signal<Never, BuyStarGiftError> {
     let source: BotPaymentInvoiceSource = .starGiftResale(slug: slug, toPeerId: peerId, ton: price?.currency == .ton)
     return _internal_fetchBotPaymentForm(accountPeerId: account.peerId, postbox: account.postbox, network: account.network, source: source, themeParams: nil)
@@ -2635,15 +2668,27 @@ private final class ProfileGiftsContextImpl {
         
     private func pushState() {
         let useMainData = (self.filter == .All && self.sorting == .date) || self.filteredCount == nil
-        
-        let effectiveGifts = useMainData ? self.gifts : self.filteredGifts
-        let effectiveCount = useMainData ? self.count : self.filteredCount
+
+        var mainGifts = self.gifts
+        var effectiveGifts = useMainData ? self.gifts : self.filteredGifts
+        var effectiveCount = useMainData ? self.count : self.filteredCount
         let effectiveDataState = useMainData ? self.dataState : self.filteredDataState
-        
+
+        if SGSimpleSettings.shared.fakeGiftsEnabled && self.collectionId == nil {
+            let fakeGifts = SGFakeGiftsStore.gifts(forPeerId: self.peerId.toInt64())
+            if !fakeGifts.isEmpty {
+                mainGifts = fakeGifts + mainGifts
+                effectiveGifts = fakeGifts + effectiveGifts
+                if let currentCount = effectiveCount {
+                    effectiveCount = currentCount + Int32(fakeGifts.count)
+                }
+            }
+        }
+
         let state = ProfileGiftsContext.State(
             filter: self.filter,
             sorting: self.sorting,
-            gifts: self.gifts,
+            gifts: mainGifts,
             filteredGifts: effectiveGifts,
             count: effectiveCount,
             dataState: effectiveDataState,

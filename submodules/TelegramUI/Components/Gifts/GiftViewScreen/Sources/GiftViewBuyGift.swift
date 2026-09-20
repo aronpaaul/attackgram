@@ -3,6 +3,7 @@ import UIKit
 import Display
 import SwiftSignalKit
 import TelegramCore
+import SGSimpleSettings
 import AccountContext
 import PresentationDataUtils
 import TelegramStringFormatting
@@ -126,6 +127,9 @@ public func buyStarGiftImpl(
                 }
             },
             completed: {
+                if SGSimpleSettings.shared.fakeGiftsEnabled {
+                    context.engine.payments.saveFakeSentGift(toPeerId: recipientPeerId, gift: .unique(uniqueGift), text: nil)
+                }
                 beforeCompletion()
                 completion()
 
