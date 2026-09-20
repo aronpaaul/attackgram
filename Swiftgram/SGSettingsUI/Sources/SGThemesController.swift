@@ -7,6 +7,7 @@ import TelegramUIPreferences
 import ItemListUI
 import PresentationDataUtils
 import AccountContext
+import SGStrings
 
 private enum SGThemesSection: Int32 {
     case light
@@ -76,13 +77,14 @@ public func sgThemesController(context: AccountContext) -> ViewController {
 
     let signal = context.sharedContext.presentationData
     |> map { presentationData -> (ItemListControllerState, (ItemListNodeState, Any)) in
+        let lang = presentationData.strings.baseLanguageCode
         var entries: [SGThemeEntry] = []
-        entries.append(.theme(0, SGThemesSection.light.rawValue, "Классическая", PresentationBuiltinThemeReference.dayClassic.rawValue))
-        entries.append(.theme(1, SGThemesSection.light.rawValue, "Дневная", PresentationBuiltinThemeReference.day.rawValue))
-        entries.append(.theme(2, SGThemesSection.dark.rawValue, "Ночная", PresentationBuiltinThemeReference.night.rawValue))
-        entries.append(.theme(3, SGThemesSection.dark.rawValue, "Ночная синяя", PresentationBuiltinThemeReference.nightAccent.rawValue))
+        entries.append(.theme(0, SGThemesSection.light.rawValue, "Attack.Themes.Classic".i18n(lang), PresentationBuiltinThemeReference.dayClassic.rawValue))
+        entries.append(.theme(1, SGThemesSection.light.rawValue, "Attack.Themes.Day".i18n(lang), PresentationBuiltinThemeReference.day.rawValue))
+        entries.append(.theme(2, SGThemesSection.dark.rawValue, "Attack.Themes.Night".i18n(lang), PresentationBuiltinThemeReference.night.rawValue))
+        entries.append(.theme(3, SGThemesSection.dark.rawValue, "Attack.Themes.NightBlue".i18n(lang), PresentationBuiltinThemeReference.nightAccent.rawValue))
 
-        let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("Готовые темы"), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
+        let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("Attack.Themes.Title".i18n(lang)), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
         let listState = ItemListNodeState(presentationData: ItemListPresentationData(presentationData), entries: entries, style: .blocks)
         return (controllerState, (listState, arguments))
     }

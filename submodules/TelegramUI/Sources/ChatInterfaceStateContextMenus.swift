@@ -2338,10 +2338,11 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
         }
 
         // MARK: Swiftgram
+        let attackLang = chatPresentationInterfaceState.strings.baseLanguageCode
         if let editHistory = message.attributes.first(where: { $0 is SGEditHistoryAttribute }) as? SGEditHistoryAttribute, !editHistory.texts.isEmpty {
             let historyMessageText = message.text
             actions.append(.separator)
-            actions.append(.action(ContextMenuActionItem(text: "История правок", icon: { theme in
+            actions.append(.action(ContextMenuActionItem(text: "Attack.Context.EditHistory".i18n(attackLang), icon: { theme in
                 return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Message"), color: theme.actionSheet.primaryTextColor)
             }, action: { c, _ in
                 c?.dismiss(completion: {
@@ -2353,8 +2354,8 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                         let date = dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(editHistory.timestamps[index])))
                         lines.append("[\(date)]\n\(editHistory.texts[index])")
                     }
-                    lines.append("[сейчас]\n\(historyMessageText)")
-                    controllerInteraction.presentController(textAlertController(context: context, title: "История правок", text: lines.joined(separator: "\n\n"), actions: [TextAlertAction(type: .defaultAction, title: presentationData.strings.Common_OK, action: {})]), nil)
+                    lines.append("[now]\n\(historyMessageText)")
+                    controllerInteraction.presentController(textAlertController(context: context, title: "Attack.Context.EditHistory".i18n(attackLang), text: lines.joined(separator: "\n\n"), actions: [TextAlertAction(type: .defaultAction, title: presentationData.strings.Common_OK, action: {})]), nil)
                 })
             })))
         }
@@ -2362,7 +2363,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
             let ignoreKey = "\(ignoreAuthor.id.toInt64())"
             let isIgnored = SGSimpleSettings.shared.ignoredPeerIds.contains(ignoreKey)
             actions.append(.separator)
-            actions.append(.action(ContextMenuActionItem(text: isIgnored ? "Убрать из игнора" : "Игнорировать пользователя", textColor: isIgnored ? .primary : .destructive, icon: { theme in
+            actions.append(.action(ContextMenuActionItem(text: (isIgnored ? "Attack.Context.Unignore" : "Attack.Context.Ignore").i18n(attackLang), textColor: isIgnored ? .primary : .destructive, icon: { theme in
                 return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Restrict"), color: isIgnored ? theme.actionSheet.primaryTextColor : theme.actionSheet.destructiveActionTextColor)
             }, action: { _, f in
                 var ids = SGSimpleSettings.shared.ignoredPeerIds

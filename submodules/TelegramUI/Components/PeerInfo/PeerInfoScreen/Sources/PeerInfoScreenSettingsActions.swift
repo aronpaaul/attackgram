@@ -56,11 +56,12 @@ extension PeerInfoScreenNode {
                 }
                 strongSelf.context.sharedContext.openExternalUrl(context: strongSelf.context, urlContext: .generic, url: url, forceExternal: false, presentationData: strongSelf.context.sharedContext.currentPresentationData.with({ $0 }), navigationController: navigationController, dismissInput: {})
             }
-            self.controller?.present(textAlertController(context: self.context, updatedPresentationData: self.controller?.updatedPresentationData, title: "Разработчики", text: "Над AttackGram работают два разработчика. Свяжитесь с ними:", actions: [
-                TextAlertAction(type: .genericAction, title: "Разработчик 1", action: {
+            let devLang = self.presentationData.strings.baseLanguageCode
+            self.controller?.present(textAlertController(context: self.context, updatedPresentationData: self.controller?.updatedPresentationData, title: "Attack.Developers.Title".i18n(devLang), text: "Attack.Developers.Text".i18n(devLang), actions: [
+                TextAlertAction(type: .genericAction, title: "Attack.Developers.Dev1".i18n(devLang), action: {
                     openLink("https://t.me/culter")
                 }),
-                TextAlertAction(type: .genericAction, title: "Разработчик 2", action: {
+                TextAlertAction(type: .genericAction, title: "Attack.Developers.Dev2".i18n(devLang), action: {
                     openLink("https://t.me/usingjava")
                 }),
                 TextAlertAction(type: .defaultAction, title: self.presentationData.strings.Common_Cancel, action: {})

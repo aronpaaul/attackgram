@@ -8,6 +8,7 @@ import ItemListUI
 import PresentationDataUtils
 import AccountContext
 import SGSimpleSettings
+import SGStrings
 
 private final class SGIgnoredArguments {
     let removeIgnored: (String) -> Void
@@ -65,11 +66,12 @@ public func sgIgnoredController(context: AccountContext) -> ViewController {
         let peerIds = keys.compactMap { Int64($0) }.map { PeerId($0) }
         return context.engine.data.get(EngineDataList(peerIds.map { TelegramEngine.EngineData.Item.Peer.Peer(id: $0) }))
         |> map { peers -> (ItemListControllerState, (ItemListNodeState, Any)) in
+            let lang = presentationData.strings.baseLanguageCode
             var entries: [SGIgnoredEntry] = []
             if keys.isEmpty {
-                entries.append(.info("Список игнора пуст. Зажмите сообщение пользователя и выберите «Игнорировать пользователя»."))
+                entries.append(.info("Attack.Ignored.Empty".i18n(lang)))
             } else {
-                entries.append(.info("Нажмите на пользователя, чтобы убрать из игнора."))
+                entries.append(.info("Attack.Ignored.TapToRemove".i18n(lang)))
                 for (index, key) in keys.enumerated() {
                     var name = key
                     if index < peers.count, let peer = peers[index] {
@@ -78,7 +80,7 @@ public func sgIgnoredController(context: AccountContext) -> ViewController {
                     entries.append(.user(Int32(index), key, name))
                 }
             }
-            let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("Игнор-лист"), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
+            let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("Attack.Ignored.Title".i18n(lang)), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
             let listState = ItemListNodeState(presentationData: ItemListPresentationData(presentationData), entries: entries, style: .blocks)
             return (controllerState, (listState, arguments))
         }

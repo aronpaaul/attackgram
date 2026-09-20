@@ -12,6 +12,7 @@ import ItemListPeerItem
 import DeviceAccess
 import TelegramStringFormatting
 import PeerNameColorItem
+import SGStrings
 
 enum SettingsSection: Int, CaseIterable {
     case edit
@@ -228,10 +229,11 @@ func settingsItems(showProfileId: Bool, data: PeerInfoScreenData?, context: Acco
     items[.swiftgram]!.append(PeerInfoScreenDisclosureItem(id: 1, label: swiftgramLabel, text: "AttackGram", icon: PresentationResourcesSettings.swiftgram, action: {
         interaction.openSettings(.swiftgram)
     }))
-    items[.developers]!.append(PeerInfoScreenDisclosureItem(id: 0, text: "Разработчики", icon: PresentationResourcesSettings.swiftgram, action: {
+    let sgSettingsLang = presentationData.strings.baseLanguageCode
+    items[.developers]!.append(PeerInfoScreenDisclosureItem(id: 0, text: "Attack.Developers.Title".i18n(sgSettingsLang), icon: PresentationResourcesSettings.swiftgram, action: {
         interaction.openSettings(.developers)
     }))
-    items[.extended]!.append(PeerInfoScreenDisclosureItem(id: 0, text: "Extended", icon: PresentationResourcesSettings.swiftgram, action: {
+    items[.extended]!.append(PeerInfoScreenDisclosureItem(id: 0, text: "Attack.Extended.Title".i18n(sgSettingsLang), icon: PresentationResourcesSettings.swiftgram, action: {
         interaction.openSettings(.extended)
     }))
 

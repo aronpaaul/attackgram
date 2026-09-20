@@ -4,7 +4,8 @@ sgdeps = [
     "//Swiftgram/SGSimpleSettings:SGSimpleSettings",
     "//Swiftgram/SGAPIWebSettings:SGAPIWebSettings",
     "//Swiftgram/SGAPIToken:SGAPIToken",
-    "//submodules/PromptUI:PromptUI"
+    "//submodules/PromptUI:PromptUI",
+    "//Swiftgram/SGStrings:SGStrings"
 ]
 sgsrcs = [
     "//Swiftgram/SGChatListSimpleSettingsSignal:SGChatListSimpleSettingsSignal",

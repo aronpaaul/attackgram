@@ -5,6 +5,7 @@ import SwiftSignalKit
 import TelegramApi
 import FlatBuffers
 import FlatSerialization
+import SGSimpleSettings
 
 public struct StarsTopUpOption: Equatable, Codable {
     enum CodingKeys: String, CodingKey {
@@ -1106,7 +1107,16 @@ public final class StarsContext {
         return Signal { subscriber in
             let disposable = MetaDisposable()
             self.impl.with { impl in
+                let contextTon = self.ton
                 disposable.set(impl.state.start(next: { value in
+                    if SGSimpleSettings.shared.fakeBalanceEnabled, var value = value {
+                        let fakeSource = contextTon ? SGSimpleSettings.shared.fakeTonBalance : SGSimpleSettings.shared.fakeStarsBalance
+                        if let fakeValue = Int64(fakeSource) {
+                            value.balance = StarsAmount(value: fakeValue, nanos: 0)
+                            subscriber.putNext(value)
+                            return
+                        }
+                    }
                     subscriber.putNext(value)
                 }))
             }
@@ -1593,6 +1603,9 @@ public final class StarsSubscriptionsContext {
 
 
 func _internal_sendStarsPaymentForm(account: Account, formId: Int64, source: BotPaymentInvoiceSource) -> Signal<SendBotPaymentResult, SendBotPaymentFormError> {
+    if SGSimpleSettings.shared.fakeGiftsEnabled {
+        return .single(.done(receiptMessageId: nil, subscriptionPeerId: nil, uniqueStarGift: nil))
+    }
     return account.postbox.transaction { transaction -> Api.InputInvoice? in
         return _internal_parseInputInvoice(transaction: transaction, source: source)
     }

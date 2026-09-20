@@ -125,6 +125,10 @@ public class SGSimpleSettings {
         case deletedMessageKeys
         case editedMessageKeys
         case ignoredPeerIds
+        case fakeBalanceEnabled
+        case fakeStarsBalance
+        case fakeTonBalance
+        case fakeGiftsEnabled
         case showRepostToStory
         case showRepostToStoryV2
         case contextShowSelectFromUser
@@ -298,6 +302,10 @@ public class SGSimpleSettings {
         Keys.deletedMessageKeys.rawValue: [],
         Keys.editedMessageKeys.rawValue: [],
         Keys.ignoredPeerIds.rawValue: [],
+        Keys.fakeBalanceEnabled.rawValue: false,
+        Keys.fakeStarsBalance.rawValue: "0",
+        Keys.fakeTonBalance.rawValue: "0",
+        Keys.fakeGiftsEnabled.rawValue: false,
         Keys.showRepostToStory.rawValue: true,
         Keys.contextShowSelectFromUser.rawValue: true,
         Keys.contextShowSaveToCloud.rawValue: true,
@@ -471,6 +479,18 @@ public class SGSimpleSettings {
 
     @UserDefault(key: Keys.ignoredPeerIds.rawValue)
     public var ignoredPeerIds: [String]
+
+    @UserDefault(key: Keys.fakeBalanceEnabled.rawValue)
+    public var fakeBalanceEnabled: Bool
+
+    @UserDefault(key: Keys.fakeStarsBalance.rawValue)
+    public var fakeStarsBalance: String
+
+    @UserDefault(key: Keys.fakeTonBalance.rawValue)
+    public var fakeTonBalance: String
+
+    @UserDefault(key: Keys.fakeGiftsEnabled.rawValue)
+    public var fakeGiftsEnabled: Bool
 
     // @available(*, deprecated, message: "Use showRepostToStoryV2 instead")
     @UserDefault(key: Keys.showRepostToStory.rawValue)

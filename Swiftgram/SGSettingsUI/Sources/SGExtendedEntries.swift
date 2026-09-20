@@ -9,7 +9,20 @@ enum SGExtendedSection: Int32 {
     case themes
     case privacy
     case deleted
+    case fakeBalance
     case maintenance
+}
+
+final class SGFakeStarsInputTag: ItemListItemTag {
+    func isEqual(to other: ItemListItemTag) -> Bool {
+        return other is SGFakeStarsInputTag
+    }
+}
+
+final class SGFakeTonInputTag: ItemListItemTag {
+    func isEqual(to other: ItemListItemTag) -> Bool {
+        return other is SGFakeTonInputTag
+    }
 }
 
 final class SGExtendedSearchTag: ItemListItemTag {
@@ -34,8 +47,12 @@ final class SGExtendedArguments {
     let toggleSaveDeletedSelf: (Bool) -> Void
     let clearDeleted: () -> Void
     let clearEdited: () -> Void
+    let toggleFakeBalance: (Bool) -> Void
+    let updateFakeStars: (String) -> Void
+    let updateFakeTon: (String) -> Void
+    let toggleFakeGifts: (Bool) -> Void
 
-    init(updateSearch: @escaping (String) -> Void, toggleUnlimitedPins: @escaping (Bool) -> Void, openThemes: @escaping () -> Void, openIgnored: @escaping () -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveEditHistory: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void, clearDeleted: @escaping () -> Void, clearEdited: @escaping () -> Void) {
+    init(updateSearch: @escaping (String) -> Void, toggleUnlimitedPins: @escaping (Bool) -> Void, openThemes: @escaping () -> Void, openIgnored: @escaping () -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveEditHistory: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void, clearDeleted: @escaping () -> Void, clearEdited: @escaping () -> Void, toggleFakeBalance: @escaping (Bool) -> Void, updateFakeStars: @escaping (String) -> Void, updateFakeTon: @escaping (String) -> Void, toggleFakeGifts: @escaping (Bool) -> Void) {
         self.updateSearch = updateSearch
         self.toggleUnlimitedPins = toggleUnlimitedPins
         self.openThemes = openThemes
@@ -51,6 +68,10 @@ final class SGExtendedArguments {
         self.toggleSaveDeletedSelf = toggleSaveDeletedSelf
         self.clearDeleted = clearDeleted
         self.clearEdited = clearEdited
+        self.toggleFakeBalance = toggleFakeBalance
+        self.updateFakeStars = updateFakeStars
+        self.updateFakeTon = updateFakeTon
+        self.toggleFakeGifts = toggleFakeGifts
     }
 }
 
@@ -70,6 +91,10 @@ enum SGExtendedEntry: ItemListNodeEntry {
     case saveDeletedSelf(String, Bool)
     case clearDeleted(String)
     case clearEdited(String)
+    case fakeBalance(String, Bool)
+    case fakeStars(String, String)
+    case fakeTon(String, String)
+    case fakeGifts(String, Bool)
 
     var section: ItemListSectionId {
         switch self {
@@ -85,6 +110,8 @@ enum SGExtendedEntry: ItemListNodeEntry {
             return SGExtendedSection.deleted.rawValue
         case .clearDeleted, .clearEdited:
             return SGExtendedSection.maintenance.rawValue
+        case .fakeBalance, .fakeStars, .fakeTon, .fakeGifts:
+            return SGExtendedSection.fakeBalance.rawValue
         }
     }
 
@@ -105,13 +132,17 @@ enum SGExtendedEntry: ItemListNodeEntry {
         case .saveDeletedSelf: return 12
         case .clearDeleted: return 13
         case .clearEdited: return 14
+        case .fakeBalance: return 15
+        case .fakeStars: return 16
+        case .fakeTon: return 17
+        case .fakeGifts: return 18
         }
     }
 
     var searchableTitle: String {
         switch self {
         case .search: return ""
-        case let .unlimitedPins(title, _), let .themes(title), let .ignoredList(title), let .invisibleMode(title, _), let .hideOnline(title, _), let .hideTyping(title, _), let .dontSendRead(title, _), let .voiceVideoReceipts(title, _), let .saveEditHistory(title, _), let .saveDeleted(title, _), let .saveDeletedBots(title, _), let .saveDeletedSelf(title, _), let .clearDeleted(title), let .clearEdited(title):
+        case let .unlimitedPins(title, _), let .themes(title), let .ignoredList(title), let .invisibleMode(title, _), let .hideOnline(title, _), let .hideTyping(title, _), let .dontSendRead(title, _), let .voiceVideoReceipts(title, _), let .saveEditHistory(title, _), let .saveDeleted(title, _), let .saveDeletedBots(title, _), let .saveDeletedSelf(title, _), let .clearDeleted(title), let .clearEdited(title), let .fakeBalance(title, _), let .fakeStars(title, _), let .fakeTon(title, _), let .fakeGifts(title, _):
             return title
         }
     }
@@ -155,6 +186,14 @@ enum SGExtendedEntry: ItemListNodeEntry {
             return ItemListActionItem(presentationData: presentationData, title: title, kind: .destructive, alignment: .natural, sectionId: self.section, style: .blocks, action: { arguments.clearDeleted() })
         case let .clearEdited(title):
             return ItemListActionItem(presentationData: presentationData, title: title, kind: .destructive, alignment: .natural, sectionId: self.section, style: .blocks, action: { arguments.clearEdited() })
+        case let .fakeBalance(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleFakeBalance($0) })
+        case let .fakeStars(placeholder, value):
+            return ItemListSingleLineInputItem(presentationData: presentationData, title: NSAttributedString(string: "★"), text: value, placeholder: placeholder, type: .regular(capitalization: false, autocorrection: false), clearType: .always, tag: SGFakeStarsInputTag(), sectionId: self.section, textUpdated: { arguments.updateFakeStars($0) }, action: {})
+        case let .fakeTon(placeholder, value):
+            return ItemListSingleLineInputItem(presentationData: presentationData, title: NSAttributedString(string: "TON"), text: value, placeholder: placeholder, type: .regular(capitalization: false, autocorrection: false), clearType: .always, tag: SGFakeTonInputTag(), sectionId: self.section, textUpdated: { arguments.updateFakeTon($0) }, action: {})
+        case let .fakeGifts(title, value):
+            return ItemListSwitchItem(presentationData: presentationData, title: title, value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleFakeGifts($0) })
         }
     }
 }

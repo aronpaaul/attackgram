@@ -17,6 +17,7 @@ import ChatTimerScreen
 import NotificationPeerExceptionController
 import SGSimpleSettings
 import PromptUI
+import SGStrings
 
 func archiveContextMenuItems(context: AccountContext, group: EngineChatList.Group, chatListController: ChatListControllerImpl?) -> Signal<[ContextMenuItem], NoError> {
     let presentationData = context.sharedContext.currentPresentationData.with({ $0 })
@@ -183,9 +184,10 @@ func chatContextMenuItems(context: AccountContext, peerId: EnginePeer.Id, promoI
 
                         let sgNoteKey = "\(peerId.toInt64())"
                         let sgExistingNote = SGSimpleSettings.shared.chatNotes[sgNoteKey] ?? ""
-                        items.append(.action(ContextMenuActionItem(text: sgExistingNote.isEmpty ? "Заметка" : "Заметка ✎", icon: { theme in generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Info"), color: theme.contextMenu.primaryColor) }, action: { [weak chatListController] _, f in
+                        let sgNoteLang = strings.baseLanguageCode
+                        items.append(.action(ContextMenuActionItem(text: (sgExistingNote.isEmpty ? "Attack.Context.Note" : "Attack.Context.NoteFilled").i18n(sgNoteLang), icon: { theme in generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Info"), color: theme.contextMenu.primaryColor) }, action: { [weak chatListController] _, f in
                             f(.default)
-                            let noteController = promptController(context: context, text: "Заметка", value: sgExistingNote, placeholder: "Видна только вам", characterLimit: 4096, apply: { value in
+                            let noteController = promptController(context: context, text: "Attack.Note.Title".i18n(sgNoteLang), value: sgExistingNote, placeholder: "Attack.Note.Placeholder".i18n(sgNoteLang), characterLimit: 4096, apply: { value in
                                 if let value = value {
                                     let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
                                     if trimmed.isEmpty {

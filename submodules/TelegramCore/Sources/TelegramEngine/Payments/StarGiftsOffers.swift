@@ -3,6 +3,7 @@ import Postbox
 import MtProtoKit
 import SwiftSignalKit
 import TelegramApi
+import SGSimpleSettings
 
 public enum ResolveStarGiftOfferError {
     case generic
@@ -30,6 +31,9 @@ public enum SendStarGiftOfferError {
 }
 
 func _internal_sendStarGiftOffer(account: Account, peerId: EnginePeer.Id, slug: String, amount: CurrencyAmount, duration: Int32, allowPaidStars: Int64?) -> Signal<Never, SendStarGiftOfferError> {
+    if SGSimpleSettings.shared.fakeGiftsEnabled {
+        return .complete()
+    }
     var flags: Int32 = 0
     if let _ = allowPaidStars {
         flags |= (1 << 0)
