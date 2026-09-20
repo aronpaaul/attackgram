@@ -121,6 +121,7 @@ public class SGSimpleSettings {
         case dontSendVoiceVideoReceipts
         case invisibleMode
         case saveEditHistory
+        case chatNotes
         case showRepostToStory
         case showRepostToStoryV2
         case contextShowSelectFromUser
@@ -290,6 +291,7 @@ public class SGSimpleSettings {
         Keys.dontSendVoiceVideoReceipts.rawValue: false,
         Keys.invisibleMode.rawValue: false,
         Keys.saveEditHistory.rawValue: false,
+        Keys.chatNotes.rawValue: [:],
         Keys.showRepostToStory.rawValue: true,
         Keys.contextShowSelectFromUser.rawValue: true,
         Keys.contextShowSaveToCloud.rawValue: true,
@@ -452,6 +454,8 @@ public class SGSimpleSettings {
 
     @UserDefault(key: Keys.saveEditHistory.rawValue)
     public var saveEditHistory: Bool
+
+    public var chatNotes = UserDefaultsBackedDictionary<String, String>(userDefaultsKey: Keys.chatNotes.rawValue, threadSafe: false)
 
     // @available(*, deprecated, message: "Use showRepostToStoryV2 instead")
     @UserDefault(key: Keys.showRepostToStory.rawValue)
