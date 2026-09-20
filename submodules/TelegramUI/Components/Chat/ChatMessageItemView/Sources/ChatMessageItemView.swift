@@ -668,7 +668,6 @@ open class ChatMessageItemView: ListViewItemNode, ChatMessageItemNodeProtocol {
     
     private var wasFilteredKeywordTested: Bool = false
     private var matchedFilterKeyword: String? = nil
-    private var sgDeletedIconNode: ASImageNode?
     
     public required init(rotated: Bool) {
         super.init(layerBacked: false, rotated: rotated)
@@ -693,7 +692,6 @@ open class ChatMessageItemView: ListViewItemNode, ChatMessageItemNodeProtocol {
         self.wasFilteredKeywordTested = false
         self.matchedFilterKeyword = nil
         self.alpha = 1.0
-        self.sgDeletedIconNode?.isHidden = true
     }
     
     open func setupItem(_ item: ChatMessageItem, synchronousLoad: Bool) {
@@ -717,32 +715,6 @@ open class ChatMessageItemView: ListViewItemNode, ChatMessageItemNodeProtocol {
                 self.layer.animateAlpha(from: self.alpha, to: 0.5, duration: 0.35)
             }
             self.alpha = 0.5
-            self.updateSGDeletedIcon(item: item, animated: isFresh)
-        } else {
-            self.sgDeletedIconNode?.isHidden = true
-        }
-    }
-
-    private func updateSGDeletedIcon(item: ChatMessageItem, animated: Bool) {
-        let iconNode: ASImageNode
-        if let existing = self.sgDeletedIconNode {
-            iconNode = existing
-        } else {
-            iconNode = ASImageNode()
-            iconNode.displaysAsynchronously = false
-            iconNode.image = UIImage(systemName: "trash.fill")?.withTintColor(UIColor(rgb: 0xff3b30), renderingMode: .alwaysOriginal)
-            self.sgDeletedIconNode = iconNode
-            self.addSubnode(iconNode)
-        }
-        iconNode.isHidden = false
-        let isIncoming = item.message.effectivelyIncoming(item.context.account.peerId)
-        let iconSize = CGSize(width: 15.0, height: 15.0)
-        let refWidth = self.contentSize.width > 1.0 ? self.contentSize.width : self.bounds.width
-        let x = isIncoming ? 10.0 : max(10.0, refWidth - iconSize.width - 10.0)
-        iconNode.frame = CGRect(origin: CGPoint(x: x, y: 6.0), size: iconSize)
-        if animated {
-            iconNode.layer.animateScale(from: 0.3, to: 1.0, duration: 0.4)
-            iconNode.layer.animateAlpha(from: 0.0, to: 1.0, duration: 0.3)
         }
     }
 

@@ -1003,6 +1003,9 @@ public class ChatMessageBubbleItemNode: ChatMessageItemView, ChatMessagePreviewI
             }
             self.backgroundWallpaperNode.setMaskMode(self.backgroundMaskMode)
             self.backgroundNode.setMaskMode(self.backgroundMaskMode)
+            if self.item?.message.attributes.contains(where: { $0 is SGDeletedMessageAttribute }) == true {
+                self.mainContextSourceNode.contentNode.alpha = isExtractedToContextPreview ? 0.5 : 1.0
+            }
             if !isExtractedToContextPreview, let (rect, size) = self.absoluteRect {
                 self.updateAbsoluteRect(rect, within: size)
             }
