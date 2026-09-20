@@ -11,11 +11,15 @@ import SGSimpleSettings
 
 public func sgExtendedController(context: AccountContext) -> ViewController {
     let statePromise = ValuePromise(true, ignoreRepeated: false)
+    var pushControllerImpl: ((ViewController) -> Void)?
 
     let arguments = SGExtendedArguments(
         toggleUnlimitedPins: { value in
             SGSimpleSettings.shared.unlimitedPinnedChats = value
             statePromise.set(true)
+        },
+        openThemes: {
+            pushControllerImpl?(sgThemesController(context: context))
         },
         toggleInvisibleMode: { value in
             SGSimpleSettings.shared.invisibleMode = value
@@ -52,6 +56,14 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
         toggleSaveDeletedSelf: { value in
             SGSimpleSettings.shared.saveDeletedFromSelf = value
             statePromise.set(true)
+        },
+        clearDeleted: {
+            let _ = sgClearDeletedMessages(account: context.account).start()
+            statePromise.set(true)
+        },
+        clearEdited: {
+            let _ = sgClearEditHistory(account: context.account).start()
+            statePromise.set(true)
         }
     )
 
@@ -59,6 +71,7 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
     |> map { presentationData, _ -> (ItemListControllerState, (ItemListNodeState, Any)) in
         var entries: [SGExtendedEntry] = []
         entries.append(.unlimitedPins(SGSimpleSettings.shared.unlimitedPinnedChats))
+        entries.append(.themes)
         entries.append(.invisibleMode(SGSimpleSettings.shared.invisibleMode))
         entries.append(.hideOnline(SGSimpleSettings.shared.hideOnlineStatus))
         entries.append(.hideTyping(SGSimpleSettings.shared.hideTypingStatus))
@@ -70,12 +83,17 @@ public func sgExtendedController(context: AccountContext) -> ViewController {
             entries.append(.saveDeletedBots(SGSimpleSettings.shared.saveDeletedFromBots))
             entries.append(.saveDeletedSelf(SGSimpleSettings.shared.saveDeletedFromSelf))
         }
+        entries.append(.clearDeleted)
+        entries.append(.clearEdited)
 
         let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("Extended"), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
-        let emptyItem: ItemListControllerEmptyStateItem? = entries.isEmpty ? SGExtendedEmptyStateItem(theme: presentationData.theme, text: "Здесь появятся расширенные модули AttackGram.\nПока их нет.") : nil
-        let listState = ItemListNodeState(presentationData: ItemListPresentationData(presentationData), entries: entries, style: .blocks, emptyStateItem: emptyItem)
+        let listState = ItemListNodeState(presentationData: ItemListPresentationData(presentationData), entries: entries, style: .blocks)
         return (controllerState, (listState, arguments))
     }
 
-    return ItemListController(context: context, state: signal)
+    let controller = ItemListController(context: context, state: signal)
+    pushControllerImpl = { [weak controller] c in
+        (controller?.navigationController as? NavigationController)?.pushViewController(c)
+    }
+    return controller
 }

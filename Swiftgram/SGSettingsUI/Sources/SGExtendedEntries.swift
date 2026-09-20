@@ -5,12 +5,15 @@ import TelegramPresentationData
 
 enum SGExtendedSection: Int32 {
     case chats
+    case themes
     case privacy
     case deleted
+    case maintenance
 }
 
 final class SGExtendedArguments {
     let toggleUnlimitedPins: (Bool) -> Void
+    let openThemes: () -> Void
     let toggleInvisibleMode: (Bool) -> Void
     let toggleHideOnline: (Bool) -> Void
     let toggleHideTyping: (Bool) -> Void
@@ -20,9 +23,12 @@ final class SGExtendedArguments {
     let toggleSaveDeleted: (Bool) -> Void
     let toggleSaveDeletedBots: (Bool) -> Void
     let toggleSaveDeletedSelf: (Bool) -> Void
+    let clearDeleted: () -> Void
+    let clearEdited: () -> Void
 
-    init(toggleUnlimitedPins: @escaping (Bool) -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveEditHistory: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void) {
+    init(toggleUnlimitedPins: @escaping (Bool) -> Void, openThemes: @escaping () -> Void, toggleInvisibleMode: @escaping (Bool) -> Void, toggleHideOnline: @escaping (Bool) -> Void, toggleHideTyping: @escaping (Bool) -> Void, toggleDontSendRead: @escaping (Bool) -> Void, toggleVoiceVideoReceipts: @escaping (Bool) -> Void, toggleSaveEditHistory: @escaping (Bool) -> Void, toggleSaveDeleted: @escaping (Bool) -> Void, toggleSaveDeletedBots: @escaping (Bool) -> Void, toggleSaveDeletedSelf: @escaping (Bool) -> Void, clearDeleted: @escaping () -> Void, clearEdited: @escaping () -> Void) {
         self.toggleUnlimitedPins = toggleUnlimitedPins
+        self.openThemes = openThemes
         self.toggleInvisibleMode = toggleInvisibleMode
         self.toggleHideOnline = toggleHideOnline
         self.toggleHideTyping = toggleHideTyping
@@ -32,11 +38,14 @@ final class SGExtendedArguments {
         self.toggleSaveDeleted = toggleSaveDeleted
         self.toggleSaveDeletedBots = toggleSaveDeletedBots
         self.toggleSaveDeletedSelf = toggleSaveDeletedSelf
+        self.clearDeleted = clearDeleted
+        self.clearEdited = clearEdited
     }
 }
 
 enum SGExtendedEntry: ItemListNodeEntry {
     case unlimitedPins(Bool)
+    case themes
     case invisibleMode(Bool)
     case hideOnline(Bool)
     case hideTyping(Bool)
@@ -46,30 +55,39 @@ enum SGExtendedEntry: ItemListNodeEntry {
     case saveDeleted(Bool)
     case saveDeletedBots(Bool)
     case saveDeletedSelf(Bool)
+    case clearDeleted
+    case clearEdited
 
     var section: ItemListSectionId {
         switch self {
         case .unlimitedPins:
             return SGExtendedSection.chats.rawValue
+        case .themes:
+            return SGExtendedSection.themes.rawValue
         case .invisibleMode, .hideOnline, .hideTyping, .dontSendRead, .voiceVideoReceipts:
             return SGExtendedSection.privacy.rawValue
         case .saveEditHistory, .saveDeleted, .saveDeletedBots, .saveDeletedSelf:
             return SGExtendedSection.deleted.rawValue
+        case .clearDeleted, .clearEdited:
+            return SGExtendedSection.maintenance.rawValue
         }
     }
 
     var stableId: Int32 {
         switch self {
         case .unlimitedPins: return 0
-        case .invisibleMode: return 1
-        case .hideOnline: return 2
-        case .hideTyping: return 3
-        case .dontSendRead: return 4
-        case .voiceVideoReceipts: return 5
-        case .saveEditHistory: return 6
-        case .saveDeleted: return 7
-        case .saveDeletedBots: return 8
-        case .saveDeletedSelf: return 9
+        case .themes: return 1
+        case .invisibleMode: return 2
+        case .hideOnline: return 3
+        case .hideTyping: return 4
+        case .dontSendRead: return 5
+        case .voiceVideoReceipts: return 6
+        case .saveEditHistory: return 7
+        case .saveDeleted: return 8
+        case .saveDeletedBots: return 9
+        case .saveDeletedSelf: return 10
+        case .clearDeleted: return 11
+        case .clearEdited: return 12
         }
     }
 
@@ -82,6 +100,8 @@ enum SGExtendedEntry: ItemListNodeEntry {
         switch self {
         case let .unlimitedPins(value):
             return ItemListSwitchItem(presentationData: presentationData, title: "Безлимитный закреп чатов", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleUnlimitedPins($0) })
+        case .themes:
+            return ItemListDisclosureItem(presentationData: presentationData, title: "Готовые темы", label: "", sectionId: self.section, style: .blocks, action: { arguments.openThemes() })
         case let .invisibleMode(value):
             return ItemListSwitchItem(presentationData: presentationData, title: "Невидимый режим", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleInvisibleMode($0) })
         case let .hideOnline(value):
@@ -100,6 +120,10 @@ enum SGExtendedEntry: ItemListNodeEntry {
             return ItemListSwitchItem(presentationData: presentationData, title: "Удалённые в ботах", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveDeletedBots($0) })
         case let .saveDeletedSelf(value):
             return ItemListSwitchItem(presentationData: presentationData, title: "Удалённые от себя", value: value, sectionId: self.section, style: .blocks, updated: { arguments.toggleSaveDeletedSelf($0) })
+        case .clearDeleted:
+            return ItemListActionItem(presentationData: presentationData, title: "Очистить историю удалённых", kind: .destructive, alignment: .natural, sectionId: self.section, style: .blocks, action: { arguments.clearDeleted() })
+        case .clearEdited:
+            return ItemListActionItem(presentationData: presentationData, title: "Очистить историю правок", kind: .destructive, alignment: .natural, sectionId: self.section, style: .blocks, action: { arguments.clearEdited() })
         }
     }
 }

@@ -4558,6 +4558,12 @@ func replayFinalState(
                         historyTimestamps.append(previousMessage.timestamp)
                         updatedAttributes.removeAll(where: { $0 is SGEditHistoryAttribute })
                         updatedAttributes.append(SGEditHistoryAttribute(texts: historyTexts, timestamps: historyTimestamps))
+                        let editKey = sgMessageKey(id)
+                        var editKeys = SGSimpleSettings.shared.editedMessageKeys
+                        if !editKeys.contains(editKey) {
+                            editKeys.append(editKey)
+                            SGSimpleSettings.shared.editedMessageKeys = editKeys
+                        }
                     }
 
                     if let message = locallyRenderedMessage(message: message, peers: peers) {
