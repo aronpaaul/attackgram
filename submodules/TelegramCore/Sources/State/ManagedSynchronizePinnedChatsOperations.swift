@@ -3,6 +3,7 @@ import Postbox
 import SwiftSignalKit
 import TelegramApi
 import MtProtoKit
+import SGSimpleSettings
 
 private final class ManagedSynchronizePinnedChatsOperationsHelper {
     var operationDisposables: [Int32: Disposable] = [:]
@@ -221,7 +222,15 @@ private func synchronizePinnedChats(transaction: Transaction, postbox: Postbox, 
                 resultingItemIds = localItemIds.filter { !remotelyRemovedItemIds.contains($0) }
                 resultingItemIds.append(contentsOf: remoteItemIds.filter { !locallyRemovedFromRemoteItemIds.contains($0) && !resultingItemIds.contains($0) })
             }
-            
+
+            if SGSimpleSettings.shared.unlimitedPinnedChats {
+                var mergedItemIds = localItemIds
+                for itemId in resultingItemIds where !mergedItemIds.contains(itemId) {
+                    mergedItemIds.append(itemId)
+                }
+                resultingItemIds = mergedItemIds
+            }
+
             return postbox.transaction { transaction -> Signal<Void, NoError> in
                 updatePeers(transaction: transaction, accountPeerId: accountPeerId, peers: parsedPeers)
                 

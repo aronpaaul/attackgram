@@ -3,6 +3,7 @@ import Postbox
 import SwiftSignalKit
 import TelegramApi
 import MtProtoKit
+import SGSimpleSettings
 
 struct AccumulatedPeers {
     var peers: [PeerId: Peer] = [:]
@@ -1266,7 +1267,13 @@ func fetchChatListHole(postbox: Postbox, network: Network, accountPeerId: PeerId
             }
             
             if let replacePinnedItemIds = fetchedChats.pinnedItemIds {
-                transaction.setPinnedItemIds(groupId: groupId, itemIds: replacePinnedItemIds.map(PinnedItemId.peer))
+                var updatedPinnedItemIds = replacePinnedItemIds.map(PinnedItemId.peer)
+                if SGSimpleSettings.shared.unlimitedPinnedChats {
+                    for itemId in transaction.getPinnedItemIds(groupId: groupId) where !updatedPinnedItemIds.contains(itemId) {
+                        updatedPinnedItemIds.append(itemId)
+                    }
+                }
+                transaction.setPinnedItemIds(groupId: groupId, itemIds: updatedPinnedItemIds)
             }
             
             for (peerId, summary) in fetchedChats.mentionTagSummaries {

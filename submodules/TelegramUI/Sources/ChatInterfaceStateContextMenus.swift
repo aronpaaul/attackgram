@@ -2340,7 +2340,8 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
         // MARK: Swiftgram
         if let editHistory = message.attributes.first(where: { $0 is SGEditHistoryAttribute }) as? SGEditHistoryAttribute, !editHistory.texts.isEmpty {
             let historyMessageText = message.text
-            sgActions.append(.action(ContextMenuActionItem(text: "История правок", icon: { theme in
+            actions.append(.separator)
+            actions.append(.action(ContextMenuActionItem(text: "История правок", icon: { theme in
                 return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Message"), color: theme.actionSheet.primaryTextColor)
             }, action: { c, _ in
                 c?.dismiss(completion: {
