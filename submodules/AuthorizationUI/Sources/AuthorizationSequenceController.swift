@@ -1326,6 +1326,7 @@ public final class AuthorizationSequenceController: NavigationController, ASAuth
                     if !self.otherAccountPhoneNumbers.1.isEmpty {
                         controllers.append(self.splashController())
                     }
+                    controllers.append(self.phoneEntryController(countryCode: AuthorizationSequenceCountrySelectionController.defaultCountryCode(), number: "", splashController: nil))
                     controllers.append(self.passwordEntryController(hint: hint, suggestReset: suggestReset, syncContacts: syncContacts))
                     self.setViewControllers(controllers, animated: !self.viewControllers.isEmpty)
                 case let .passwordRecovery(_, _, _, emailPattern, syncContacts):
