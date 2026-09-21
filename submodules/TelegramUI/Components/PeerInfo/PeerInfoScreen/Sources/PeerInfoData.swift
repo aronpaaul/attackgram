@@ -4,6 +4,7 @@ import Foundation
 import UIKit
 import Postbox
 import TelegramCore
+import SGSimpleSettings
 import SwiftSignalKit
 import AccountContext
 import PeerPresenceStatusManager
@@ -1560,7 +1561,8 @@ func peerInfoScreenData(
                 if isMyProfile {
                     availablePanes?.insert(.stories, at: 0)
                     if availablePanes != nil, profileGiftsContext != nil, let cachedData = peerView.cachedData as? CachedUserData {
-                        if let starGiftsCount = cachedData.starGiftsCount, starGiftsCount > 0 {
+                        let hasFakeGifts = SGSimpleSettings.shared.fakeGiftsEnabled && SGFakeGiftsStore.hasGifts(forPeerId: peerView.peerId.toInt64())
+                        if (cachedData.starGiftsCount ?? 0) > 0 || hasFakeGifts {
                             availablePanes?.insert(.gifts, at: 1)
                         }
                     }
@@ -1573,7 +1575,8 @@ func peerInfoScreenData(
                     }
                     
                     if availablePanes != nil, profileGiftsContext != nil, let cachedData = peerView.cachedData as? CachedUserData, peerView.peerId != context.account.peerId {
-                        if let starGiftsCount = cachedData.starGiftsCount, starGiftsCount > 0 {
+                        let hasFakeGifts = SGSimpleSettings.shared.fakeGiftsEnabled && SGFakeGiftsStore.hasGifts(forPeerId: peerView.peerId.toInt64())
+                        if (cachedData.starGiftsCount ?? 0) > 0 || hasFakeGifts {
                             availablePanes?.insert(.gifts, at: hasStories ? 1 : 0)
                         }
                     }

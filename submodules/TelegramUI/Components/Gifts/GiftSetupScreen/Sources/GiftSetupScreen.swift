@@ -549,7 +549,8 @@ private final class GiftSetupScreenComponent: Component {
                     }
 
                     if SGSimpleSettings.shared.fakeGiftsEnabled, case let .starGift(fakeStarGift, _) = component.subject {
-                        component.context.engine.payments.saveFakeSentGift(toPeerId: peerId, gift: .generic(fakeStarGift), text: nil)
+                        let fakeText = textInputText.string.isEmpty ? nil : textInputText.string
+                        component.context.engine.payments.saveFakeSentGift(toPeerId: peerId, gift: .generic(fakeStarGift), text: fakeText, amount: finalPrice, isTon: false)
                     }
 
                     if peerId.namespace == Namespaces.Peer.CloudChannel, case let .starGift(starGift, _) = component.subject {

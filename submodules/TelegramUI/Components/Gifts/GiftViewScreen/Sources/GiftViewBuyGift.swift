@@ -128,7 +128,7 @@ public func buyStarGiftImpl(
             },
             completed: {
                 if SGSimpleSettings.shared.fakeGiftsEnabled {
-                    context.engine.payments.saveFakeSentGift(toPeerId: recipientPeerId, gift: .unique(uniqueGift), text: nil)
+                    context.engine.payments.saveFakeSentGift(toPeerId: recipientPeerId, gift: .unique(uniqueGift), text: nil, amount: finalPrice.amount.value, isTon: finalPrice.currency == .ton)
                 }
                 beforeCompletion()
                 completion()

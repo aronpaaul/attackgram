@@ -555,6 +555,16 @@ private func _internal_requestStarsSubscriptions(account: Account, peerId: Engin
     }
 }
 
+func sgBuildFakeTransactions(isTon: Bool) -> [StarsContext.State.Transaction] {
+    return SGFakeTransactionsStore.transactions(isTon: isTon).map { fake in
+        var flags: StarsContext.State.Transaction.Flags = []
+        if fake.isGift {
+            flags.insert(.isGift)
+        }
+        return StarsContext.State.Transaction(flags: flags, id: fake.id, count: CurrencyAmount(amount: StarsAmount(value: fake.amount, nanos: 0), currency: isTon ? .ton : .stars), date: fake.date, peer: .fragment, title: fake.title, description: nil, photo: nil, transactionDate: nil, transactionUrl: nil, paidMessageId: nil, giveawayMessageId: nil, media: [], subscriptionPeriod: nil, starGift: nil, floodskipNumber: nil, starrefCommissionPermille: nil, starrefPeerId: nil, starrefAmount: nil, paidMessageCount: nil, premiumGiftMonths: nil, adsProceedsFromDate: nil, adsProceedsToDate: nil)
+    }
+}
+
 private final class StarsContextImpl {
     private let account: Account
     fileprivate let peerId: EnginePeer.Id
@@ -1112,11 +1122,14 @@ public final class StarsContext {
                     if SGSimpleSettings.shared.fakeBalanceEnabled {
                         let fakeSource = contextTon ? SGSimpleSettings.shared.fakeTonBalance : SGSimpleSettings.shared.fakeStarsBalance
                         if let fakeValue = Int64(fakeSource) {
+                            let balanceValue = contextTon ? fakeValue * 1_000_000_000 : fakeValue
+                            let fakeTransactions = sgBuildFakeTransactions(isTon: contextTon)
                             if var value = value {
-                                value.balance = StarsAmount(value: fakeValue, nanos: 0)
+                                value.balance = StarsAmount(value: balanceValue, nanos: 0)
+                                value.transactions = fakeTransactions + value.transactions.filter { tx in !fakeTransactions.contains(where: { $0.id == tx.id }) }
                                 subscriber.putNext(value)
                             } else {
-                                subscriber.putNext(StarsContext.State(flags: [], balance: StarsAmount(value: fakeValue, nanos: 0), subscriptions: [], canLoadMoreSubscriptions: false, transactions: [], canLoadMoreTransactions: false, isLoading: false))
+                                subscriber.putNext(StarsContext.State(flags: [], balance: StarsAmount(value: balanceValue, nanos: 0), subscriptions: [], canLoadMoreSubscriptions: false, transactions: fakeTransactions, canLoadMoreTransactions: false, isLoading: false))
                             }
                             return
                         }
@@ -1146,11 +1159,14 @@ public final class StarsContext {
         if SGSimpleSettings.shared.fakeBalanceEnabled {
             let fakeSource = self.ton ? SGSimpleSettings.shared.fakeTonBalance : SGSimpleSettings.shared.fakeStarsBalance
             if let fakeValue = Int64(fakeSource) {
+                let balanceValue = self.ton ? fakeValue * 1_000_000_000 : fakeValue
+                let fakeTransactions = sgBuildFakeTransactions(isTon: self.ton)
                 if var value = state {
-                    value.balance = StarsAmount(value: fakeValue, nanos: 0)
+                    value.balance = StarsAmount(value: balanceValue, nanos: 0)
+                    value.transactions = fakeTransactions + value.transactions.filter { tx in !fakeTransactions.contains(where: { $0.id == tx.id }) }
                     return value
                 } else {
-                    return StarsContext.State(flags: [], balance: StarsAmount(value: fakeValue, nanos: 0), subscriptions: [], canLoadMoreSubscriptions: false, transactions: [], canLoadMoreTransactions: false, isLoading: false)
+                    return StarsContext.State(flags: [], balance: StarsAmount(value: balanceValue, nanos: 0), subscriptions: [], canLoadMoreSubscriptions: false, transactions: fakeTransactions, canLoadMoreTransactions: false, isLoading: false)
                 }
             }
         }

@@ -1,11 +1,18 @@
 import Foundation
 import Postbox
 
-final class SGFakeGiftsStore {
+public final class SGFakeGiftsStore {
     private static let defaultsKey = "sgFakeSentGiftsV1"
 
     private static var defaults: UserDefaults {
         return UserDefaults.standard
+    }
+
+    public static func hasGifts(forPeerId peerId: Int64) -> Bool {
+        guard let map = defaults.dictionary(forKey: defaultsKey) as? [String: String] else {
+            return false
+        }
+        return map["\(peerId)"] != nil
     }
 
     static func gifts(forPeerId peerId: Int64) -> [ProfileGiftsContext.State.StarGift] {
